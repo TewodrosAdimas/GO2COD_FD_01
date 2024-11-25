@@ -21,5 +21,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+    username = serializers.CharField(required=True)  # Mandatory field
+    password = serializers.CharField(
+        required=True, write_only=True
+    )  # Mandatory and hidden in responses
