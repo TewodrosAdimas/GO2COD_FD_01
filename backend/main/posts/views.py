@@ -5,6 +5,7 @@ from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
 from .permissions import IsAuthor
 from django.utils import timezone
+from taggit.models import Tag
 
 
 class PostCreateView(generics.CreateAPIView):
@@ -16,8 +17,16 @@ class PostCreateView(generics.CreateAPIView):
 
 
 class PostListView(generics.ListAPIView):
-    queryset = Post.objects.all()
     serializer_class = PostSerializer
+
+    def get_queryset(self):
+        queryset = Post.objects.all()
+        tag = self.request.query_params.get(
+            "tag", None
+        )  # Get the tag from query params
+        if tag:
+            queryset = queryset.filter(tags__name__in=[tag])  # Filter posts by the tag
+        return queryset
 
 
 class PostDetailView(generics.RetrieveAPIView):
