@@ -16,7 +16,7 @@ Include the token in the request header for endpoints that require authenticatio
 
 ### **1. User Registration**
 
-**URL:** `/register/`  
+**URL:** `accounts/register/`  
 **Method:** `POST`  
 **Description:** Allows users to register a new account.
 
@@ -52,7 +52,7 @@ Include the token in the request header for endpoints that require authenticatio
 
 ### **2. User Login**
 
-**URL:** `/login/`  
+**URL:** `accounts/login/`  
 **Method:** `POST`  
 **Description:** Authenticates a user and returns a token.
 
@@ -84,7 +84,7 @@ Include the token in the request header for endpoints that require authenticatio
 
 ### **3. Fetch User Profile**
 
-**URL:** `/profile/`  
+**URL:** `accounts/profile/`  
 **Method:** `GET`  
 **Description:** Retrieves the profile information of the authenticated user.  
 **Authentication:** Required (Token)
@@ -112,7 +112,7 @@ Include the token in the request header for endpoints that require authenticatio
 
 ### **4. Update User Profile**
 
-**URL:** `/profile/`  
+**URL:** `accounts/profile/`  
 **Method:** `PUT`  
 **Description:** Updates the authenticated user’s profile.  
 **Authentication:** Required (Token)

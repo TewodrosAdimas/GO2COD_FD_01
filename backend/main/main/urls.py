@@ -5,4 +5,3 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts", include("blog.urls")),  # Blog authentication and profile routes
 ]
-    
