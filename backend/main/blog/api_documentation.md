@@ -151,54 +151,6 @@ Include the token in the request header for endpoints that require authenticatio
 
 ---
 
-## **Error Handling**
-
-- **400 Bad Request:** Validation errors or missing/invalid fields.
-- **401 Unauthorized:** Authentication token is missing or invalid.
-- **404 Not Found:** The requested resource does not exist.
-
----
-
-## **Setup Notes**
-
-1. **Token Authentication:** Ensure `TokenAuthentication` is added in `settings.py`:
-   ```python
-   REST_FRAMEWORK = {
-        "DEFAULT_AUTHENTICATION_CLASSES": [
-            "rest_framework.authentication.TokenAuthentication",
-        ],
-        "DEFAULT_PERMISSION_CLASSES": [
-            "rest_framework.permissions.IsAuthenticated",
-        ],
-    }
-   ```
-2. **Run Migrations for Token Models:**
-
-   ```bash
-   python manage.py migrate
-   ```
-
-3. **Ensure Media File Handling:** Add the following to `settings.py` for handling `profile_picture` uploads:
-
-   ```python
-   MEDIA_URL = '/media/'
-   MEDIA_ROOT = BASE_DIR / 'media'
-   ```
-
-   Update `urls.py` to serve media files in development:
-
-   ```python
-   from django.conf import settings
-   from django.conf.urls.static import static
-
-   if settings.DEBUG:
-       urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-   ```
-
-API documentation for **Follow a user** and **Unfollow a user**:
-
----
-
 ## API Documentation: Follow and Unfollow Users
 
 ### 1. **Follow User**
@@ -206,7 +158,7 @@ API documentation for **Follow a user** and **Unfollow a user**:
 #### Endpoint:
 
 ```
-POST /follow/<username>/
+POST accounts/follow/<username>/
 ```
 
 #### Description:
@@ -254,7 +206,7 @@ This endpoint does not require a request body.
 #### Endpoint:
 
 ```
-POST /unfollow/<username>/
+POST accounts/unfollow/<username>/
 ```
 
 #### Description:
@@ -334,6 +286,52 @@ This endpoint does not require a request body.
    {
      "message": "You have unfollowed john_doe."
    }
+   ```
+
+---
+
+## **Error Handling**
+
+- **400 Bad Request:** Validation errors or missing/invalid fields.
+- **401 Unauthorized:** Authentication token is missing or invalid.
+- **404 Not Found:** The requested resource does not exist.
+
+---
+
+## **Setup Notes**
+
+1. **Token Authentication:** Ensure `TokenAuthentication` is added in `settings.py`:
+   ```python
+   REST_FRAMEWORK = {
+        "DEFAULT_AUTHENTICATION_CLASSES": [
+            "rest_framework.authentication.TokenAuthentication",
+        ],
+        "DEFAULT_PERMISSION_CLASSES": [
+            "rest_framework.permissions.IsAuthenticated",
+        ],
+    }
+   ```
+2. **Run Migrations for Token Models:**
+
+   ```bash
+   python manage.py migrate
+   ```
+
+3. **Ensure Media File Handling:** Add the following to `settings.py` for handling `profile_picture` uploads:
+
+   ```python
+   MEDIA_URL = '/media/'
+   MEDIA_ROOT = BASE_DIR / 'media'
+   ```
+
+   Update `urls.py` to serve media files in development:
+
+   ```python
+   from django.conf import settings
+   from django.conf.urls.static import static
+
+   if settings.DEBUG:
+       urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
    ```
 
 ---

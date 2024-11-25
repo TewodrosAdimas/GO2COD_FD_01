@@ -110,7 +110,7 @@ Retrieve all blog posts with a specific tag. You can also filter by multiple tag
 #### **1.4. Create a new post**
 
 ```
-POST /create/
+POST posts/create/
 ```
 
 **Description**:  
@@ -198,7 +198,7 @@ Delete a specific post. Only the author of the post can delete it.
 ### **2. Comments Endpoints**
 
 ```
-GET /comments/
+GET posts/comments/
 ```
 
 **Description**:  
@@ -223,7 +223,7 @@ Retrieve a list of all comments.
 #### **2.2. Retrieve a single comment**
 
 ```
-GET /comments/{id}/
+GET posts/comments/{id}/
 ```
 
 **Description**:  
@@ -245,7 +245,7 @@ Retrieve a specific comment by its ID.
 #### **2.3. Create a new comment**
 
 ```
-POST /comments/create/
+POST posts/comments/create/
 ```
 
 **Description**:  
@@ -276,7 +276,7 @@ Create a new comment. The author is automatically set to the currently authentic
 #### **2.4. Update a comment**
 
 ```
-PUT /comments/{id}/update/
+PUT posts/comments/{id}/update/
 ```
 
 **Description**:  
@@ -376,7 +376,7 @@ GET /posts/?tag=django,python
 ]
 ```
 
-Here’s the API documentation for the **User Feed** feature:
+API documentation for the **User Feed** feature:
 
 ---
 
@@ -384,7 +384,7 @@ Here’s the API documentation for the **User Feed** feature:
 
 ### **Endpoint**:
 
-`GET /feed/`
+`GET posts/feed/`
 
 ### **Description**:
 
@@ -498,7 +498,7 @@ These endpoints allow users to like and unlike posts. Only authenticated users c
 
 #### 1. Like a Post
 
-- **URL**: `/api/posts/like/<post_id>/`
+- **URL**: `/posts/like/<post_id>/`
 - **Method**: `POST`
 - **Authentication**: Required (User must be logged in)
 - **Parameters**:
@@ -551,42 +551,6 @@ These endpoints allow users to like and unlike posts. Only authenticated users c
 ### Error Responses
 
 - `400 Bad Request`: This error occurs if a user tries to like a post they have already liked or try to unlike a post they haven't liked.
-
-### Example Requests and Responses
-
-#### Example 1: Like a Post
-
-- **Request**:
-  - Method: `POST`
-  - URL: `/api/posts/like/1/`
-  - Headers:
-    - `Authorization: Token <your_token>`
-- **Response**:
-  - Status: `200 OK`
-  - Body:
-  ```json
-  {
-    "message": "You liked the post successfully."
-  }
-  ```
-
-#### Example 2: Unlike a Post
-
-- **Request**:
-  - Method: `POST`
-  - URL: `/api/posts/unlike/1/`
-  - Headers:
-    - `Authorization: Token <your_token>`
-- **Response**:
-  - Status: `200 OK`
-  - Body:
-  ```json
-  {
-    "message": "You unliked the post successfully."
-  }
-  ```
-
----
 
 ### Notes
 

@@ -1,5 +1,5 @@
-# views.py
-
+from notifications.models import Notification
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import generics
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
@@ -95,8 +95,16 @@ class CommentCreateView(generics.CreateAPIView):
     serializer_class = CommentSerializer
 
     def perform_create(self, serializer):
-        # Automatically set the logged-in user (CustomUser) as the author
-        serializer.save(author=self.request.user)
+        user = self.request.user
+        comment = serializer.save(author=user)
+
+        # Trigger notification
+        Notification.objects.create(
+            recipient=comment.post.author,
+            actor=user,
+            verb="commented on your post",
+            target=comment.post,
+        )
 
 
 class CommentListView(generics.ListAPIView):
@@ -129,7 +137,9 @@ class LikePostView(APIView):
     Only authenticated users can like a post, and they can like a post only once.
     """
 
-    permission_classes = [IsAuthenticated]  # Only authenticated users can access this view
+    permission_classes = [
+        IsAuthenticated
+    ]  # Only authenticated users can access this view
 
     def post(self, request, post_id):
         """
@@ -148,6 +158,15 @@ class LikePostView(APIView):
 
         # Create a like for the post
         Like.objects.create(post=post, user=user)
+
+        # Trigger notification
+        Notification.objects.create(
+            recipient=post.author,
+            actor=user,
+            verb="liked your post",
+            target=post,
+        )
+
         return Response(
             {"message": "Post liked successfully."},
             status=status.HTTP_201_CREATED,
@@ -160,7 +179,9 @@ class UnlikePostView(APIView):
     Only authenticated users can unlike a post.
     """
 
-    permission_classes = [IsAuthenticated]  # Only authenticated users can access this view
+    permission_classes = [
+        IsAuthenticated
+    ]  # Only authenticated users can access this view
 
     def post(self, request, post_id):
         """
@@ -180,6 +201,15 @@ class UnlikePostView(APIView):
 
         # Remove the like for the post
         like.delete()
+
+        # Trigger notification
+        Notification.objects.create(
+            recipient=post.author,
+            actor=user,
+            verb="unliked your post",
+            target=post,
+        )
+
         return Response(
             {"message": "Post unliked successfully."},
             status=status.HTTP_200_OK,

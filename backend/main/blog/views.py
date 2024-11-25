@@ -9,6 +9,8 @@ from rest_framework.permissions import AllowAny  # This allows unauthenticated a
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from django.shortcuts import get_object_or_404
 from .models import CustomUser
+from notifications.models import Notification
+from django.contrib.contenttypes.models import ContentType
 
 
 class UserRegistrationView(APIView):
@@ -115,6 +117,14 @@ class FollowUserView(APIView):
 
         # Add the user_to_follow to the authenticated user's following list
         user.following.add(user_to_follow)
+
+        # Trigger notification
+        Notification.objects.create(
+            recipient=user_to_follow,
+            actor=user,
+            verb="started following you",
+        )
+
         return Response(
             {"message": f"You are now following {username}."},
             status=status.HTTP_200_OK,
@@ -149,4 +159,11 @@ class UnfollowUserView(APIView):
         return Response(
             {"message": f"You have unfollowed {username}."},
             status=status.HTTP_200_OK,
+        )
+
+        # Trigger notification
+        Notification.objects.create(
+            recipient=user_to_unfollow,
+            actor=user,
+            verb="started unfollowing you",
         )
