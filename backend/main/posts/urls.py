@@ -7,6 +7,8 @@ from .views import (
     PostDetailView,
     PostUpdateView,
     PostDeleteView,
+    LikePostView,
+    UnlikePostView,
 )
 from .views import (
     CommentCreateView,
@@ -33,4 +35,6 @@ urlpatterns = [
         "comments/<int:pk>/delete/", CommentDeleteView.as_view(), name="comment-delete"
     ),
     path("feed/", UserFeedView.as_view(), name="user_feed"),
+    path("like/<int:post_id>/", LikePostView.as_view(), name="like-post"),
+    path("unlike/<int:post_id>/", UnlikePostView.as_view(), name="unlike-post"),
 ]

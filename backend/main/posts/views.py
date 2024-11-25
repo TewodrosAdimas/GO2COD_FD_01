@@ -11,6 +11,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Q
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+from .models import Post, Like
+from blog.models import CustomUser
 
 
 class UserFeedView(APIView):
@@ -114,3 +121,66 @@ class CommentUpdateView(generics.UpdateAPIView):
 class CommentDeleteView(generics.DestroyAPIView):
     queryset = Comment.objects.all()
     permission_classes = [IsAuthor]  # Ensure only the author can delete
+
+
+class LikePostView(APIView):
+    """
+    View to allow users to like a post.
+    Only authenticated users can like a post, and they can like a post only once.
+    """
+
+    permission_classes = [IsAuthenticated]  # Only authenticated users can access this view
+
+    def post(self, request, post_id):
+        """
+        Like a post by post_id.
+        If the user has already liked the post, return an error.
+        """
+        post = get_object_or_404(Post, id=post_id)
+        user = request.user  # The currently authenticated user
+
+        # Check if the user has already liked the post
+        if Like.objects.filter(post=post, user=user).exists():
+            return Response(
+                {"error": "You have already liked this post."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Create a like for the post
+        Like.objects.create(post=post, user=user)
+        return Response(
+            {"message": "Post liked successfully."},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class UnlikePostView(APIView):
+    """
+    View to allow users to unlike a post.
+    Only authenticated users can unlike a post.
+    """
+
+    permission_classes = [IsAuthenticated]  # Only authenticated users can access this view
+
+    def post(self, request, post_id):
+        """
+        Unlike a post by post_id.
+        If the user has not liked the post, return an error.
+        """
+        post = get_object_or_404(Post, id=post_id)
+        user = request.user  # The currently authenticated user
+
+        # Check if the user has liked the post
+        like = Like.objects.filter(post=post, user=user).first()
+        if not like:
+            return Response(
+                {"error": "You have not liked this post yet."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Remove the like for the post
+        like.delete()
+        return Response(
+            {"message": "Post unliked successfully."},
+            status=status.HTTP_200_OK,
+        )

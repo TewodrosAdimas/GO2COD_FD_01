@@ -375,6 +375,7 @@ GET /posts/?tag=django,python
   }
 ]
 ```
+
 Here’s the API documentation for the **User Feed** feature:
 
 ---
@@ -382,19 +383,24 @@ Here’s the API documentation for the **User Feed** feature:
 ## **User Feed API**
 
 ### **Endpoint**:
+
 `GET /feed/`
 
 ### **Description**:
+
 This endpoint retrieves a feed of posts from users that the currently authenticated user follows. The posts are ordered by their creation date, with the most recent posts shown first.
 
 ### **Permissions**:
+
 - **Authentication Required**: Yes (Authenticated users only)
 - **Permissions**: Only the authenticated user can access their feed.
 
 ### **Request Headers**:
+
 - **Authorization**: Bearer token of the authenticated user (e.g., `Authorization: Bearer <auth_token>`).
 
 ### **Request Parameters**:
+
 - **None** (No query parameters required)
 
 ### **Response**:
@@ -403,26 +409,28 @@ This endpoint retrieves a feed of posts from users that the currently authentica
 - **Content-Type**: `application/json`
 
 #### **Response Body** (Success):
+
 ```json
 [
-    {
-        "id": 1,
-        "title": "Post Title 1",
-        "content": "Content of the post",
-        "author": "john_doe",
-        "created_at": "2024-11-25T10:00:00Z"
-    },
-    {
-        "id": 2,
-        "title": "Post Title 2",
-        "content": "Content of another post",
-        "author": "jane_doe",
-        "created_at": "2024-11-24T08:00:00Z"
-    }
+  {
+    "id": 1,
+    "title": "Post Title 1",
+    "content": "Content of the post",
+    "author": "john_doe",
+    "created_at": "2024-11-25T10:00:00Z"
+  },
+  {
+    "id": 2,
+    "title": "Post Title 2",
+    "content": "Content of another post",
+    "author": "jane_doe",
+    "created_at": "2024-11-24T08:00:00Z"
+  }
 ]
 ```
 
 #### **Response Fields**:
+
 - **id**: Unique identifier of the post.
 - **title**: Title of the post.
 - **content**: Content of the post.
@@ -436,6 +444,7 @@ This endpoint retrieves a feed of posts from users that the currently authentica
 - **404 Not Found**: This status will not be encountered for this endpoint since it retrieves posts from users that the authenticated user follows.
 
 ### **Example Request**:
+
 ```bash
 GET /feed/ HTTP/1.1
 Host: api.example.com
@@ -443,28 +452,30 @@ Authorization: Bearer <auth_token>
 ```
 
 ### **Example Response**:
+
 ```json
 [
-    {
-        "id": 1,
-        "title": "Post Title 1",
-        "content": "Content of the post",
-        "author": "john_doe",
-        "created_at": "2024-11-25T10:00:00Z"
-    },
-    {
-        "id": 2,
-        "title": "Post Title 2",
-        "content": "Content of another post",
-        "author": "jane_doe",
-        "created_at": "2024-11-24T08:00:00Z"
-    }
+  {
+    "id": 1,
+    "title": "Post Title 1",
+    "content": "Content of the post",
+    "author": "john_doe",
+    "created_at": "2024-11-25T10:00:00Z"
+  },
+  {
+    "id": 2,
+    "title": "Post Title 2",
+    "content": "Content of another post",
+    "author": "jane_doe",
+    "created_at": "2024-11-24T08:00:00Z"
+  }
 ]
 ```
 
 ---
 
 ### **Notes**:
+
 - The feed is ordered by the **`created_at`** timestamp, with the most recent posts appearing first.
 - Only posts from users that the authenticated user follows are included in the feed.
 - The **Authorization** header must contain a valid Bearer token representing the authenticated user.
@@ -474,3 +485,111 @@ This API provides a personalized feed experience based on the users the current 
 ---
 
 ---
+
+---
+
+## API Documentation for Post Like/Unlike Feature
+
+### Overview
+
+These endpoints allow users to like and unlike posts. Only authenticated users can interact with these endpoints. A user can like a post only once, and they can also unlike a post they have liked.
+
+### Endpoints
+
+#### 1. Like a Post
+
+- **URL**: `/api/posts/like/<post_id>/`
+- **Method**: `POST`
+- **Authentication**: Required (User must be logged in)
+- **Parameters**:
+  - `post_id` (path parameter): The ID of the post to be liked.
+- **Request Body**: None
+- **Response**:
+  - **Status Code**: `200 OK`  
+    **Content**:
+    ```json
+    {
+      "message": "You liked the post successfully."
+    }
+    ```
+  - **Status Code**: `400 Bad Request`  
+    **Content**:
+    ```json
+    {
+      "error": "You have already liked this post."
+    }
+    ```
+
+#### 2. Unlike a Post
+
+- **URL**: `/api/posts/unlike/<post_id>/`
+- **Method**: `POST`
+- **Authentication**: Required (User must be logged in)
+- **Parameters**:
+  - `post_id` (path parameter): The ID of the post to be unliked.
+- **Request Body**: None
+- **Response**:
+  - **Status Code**: `200 OK`  
+    **Content**:
+    ```json
+    {
+      "message": "You unliked the post successfully."
+    }
+    ```
+  - **Status Code**: `400 Bad Request`  
+    **Content**:
+    ```json
+    {
+      "error": "You have not liked this post yet."
+    }
+    ```
+
+### Success Responses
+
+- `200 OK`: The request has been successfully processed, and the post has been either liked or unliked.
+
+### Error Responses
+
+- `400 Bad Request`: This error occurs if a user tries to like a post they have already liked or try to unlike a post they haven't liked.
+
+### Example Requests and Responses
+
+#### Example 1: Like a Post
+
+- **Request**:
+  - Method: `POST`
+  - URL: `/api/posts/like/1/`
+  - Headers:
+    - `Authorization: Token <your_token>`
+- **Response**:
+  - Status: `200 OK`
+  - Body:
+  ```json
+  {
+    "message": "You liked the post successfully."
+  }
+  ```
+
+#### Example 2: Unlike a Post
+
+- **Request**:
+  - Method: `POST`
+  - URL: `/api/posts/unlike/1/`
+  - Headers:
+    - `Authorization: Token <your_token>`
+- **Response**:
+  - Status: `200 OK`
+  - Body:
+  ```json
+  {
+    "message": "You unliked the post successfully."
+  }
+  ```
+
+---
+
+### Notes
+
+- Ensure that the user is authenticated via token authentication.
+- Each user can only like a post once; multiple likes from the same user are not allowed.
+- A user can unlike a post they previously liked.
