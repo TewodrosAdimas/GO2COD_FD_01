@@ -195,5 +195,145 @@ Include the token in the request header for endpoints that require authenticatio
        urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
    ```
 
+API documentation for **Follow a user** and **Unfollow a user**:
+
 ---
 
+## API Documentation: Follow and Unfollow Users
+
+### 1. **Follow User**
+
+#### Endpoint:
+
+```
+POST /follow/<username>/
+```
+
+#### Description:
+
+This endpoint allows an authenticated user to follow another user by their username. A user can follow any other user except themselves.
+
+#### Parameters:
+
+- **username** (Path Parameter): The username of the user to be followed.
+
+#### Request Headers:
+
+- **Authorization**: Bearer token for authenticated users (required).
+
+#### Request Body:
+
+This endpoint does not require a request body.
+
+#### Response:
+
+- **200 OK**: Successfully followed the user.
+  - Example Response:
+    ```json
+    {
+      "message": "You are now following john_doe."
+    }
+    ```
+- **400 Bad Request**: If the user tries to follow themselves.
+  - Example Response:
+    ```json
+    {
+      "error": "You cannot follow yourself."
+    }
+    ```
+
+#### Permissions:
+
+- Only authenticated users can use this endpoint.
+- The user cannot follow themselves.
+
+---
+
+### 2. **Unfollow User**
+
+#### Endpoint:
+
+```
+POST /unfollow/<username>/
+```
+
+#### Description:
+
+This endpoint allows an authenticated user to unfollow another user by their username. A user can unfollow any user they are following, but not themselves.
+
+#### Parameters:
+
+- **username** (Path Parameter): The username of the user to be unfollowed.
+
+#### Request Headers:
+
+- **Authorization**: Bearer token for authenticated users (required).
+
+#### Request Body:
+
+This endpoint does not require a request body.
+
+#### Response:
+
+- **200 OK**: Successfully unfollowed the user.
+  - Example Response:
+    ```json
+    {
+      "message": "You have unfollowed john_doe."
+    }
+    ```
+- **400 Bad Request**: If the user tries to unfollow themselves.
+  - Example Response:
+    ```json
+    {
+      "error": "You cannot unfollow yourself."
+    }
+    ```
+
+#### Permissions:
+
+- Only authenticated users can use this endpoint.
+- The user cannot unfollow themselves.
+
+---
+
+### Error Responses:
+
+- **401 Unauthorized**: If the user is not authenticated or the token is invalid.
+- **404 Not Found**: If the username provided in the path does not exist in the system.
+
+---
+
+### Example Workflow:
+
+#### Follow User Example:
+
+1. The user `alice` wants to follow `john_doe`.
+2. **Request**:
+   ```bash
+   POST /follow/john_doe/
+   Authorization: Bearer <auth_token>
+   ```
+3. **Response**:
+   ```json
+   {
+     "message": "You are now following john_doe."
+   }
+   ```
+
+#### Unfollow User Example:
+
+1. The user `alice` wants to unfollow `john_doe`.
+2. **Request**:
+   ```bash
+   POST /unfollow/john_doe/
+   Authorization: Bearer <auth_token>
+   ```
+3. **Response**:
+   ```json
+   {
+     "message": "You have unfollowed john_doe."
+   }
+   ```
+
+---
