@@ -1,44 +1,41 @@
+# serializers.py
+
 from rest_framework import serializers
 from .models import Post, Comment
-from django.contrib.auth import get_user_model
-
-# CustomUser model reference
-User = get_user_model()
+from blog.models import CustomUser  # Reference the CustomUser model
 
 
-class PostSerializer(serializers.ModelSerializer):
-    # Automatically handle author (ForeignKey to User)
-    author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+from rest_framework import serializers
+from .models import Post, Comment
+from taggit.serializers import TagListSerializerField, TaggitSerializer
+
+
+class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
+    tags = TagListSerializerField()  # This handles the tags
 
     class Meta:
         model = Post
-        fields = ["id", "author", "title", "content", "created_at", "updated_at"]
-        read_only_fields = ["created_at", "updated_at"]
-
-    def validate(self, data):
-        """
-        Additional validation (if needed)
-        """
-        if not data.get("title"):
-            raise serializers.ValidationError("Title cannot be empty.")
-        return data
+        fields = (
+            "id",
+            "author",
+            "title",
+            "content",
+            "created_at",
+            "updated_at",
+            "tags",
+        )
+        read_only_fields = (
+            "author",
+            "created_at",
+            "updated_at",
+        )  # 'author' should be read-only
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    # Automatically handle author (ForeignKey to User)
-    author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    # Automatically link post
-    post = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all())
+    author = (
+        serializers.StringRelatedField()
+    )  # This will display the username or name of the author
 
     class Meta:
         model = Comment
-        fields = ["id", "post", "author", "content", "created_at", "updated_at"]
-        read_only_fields = ["created_at", "updated_at"]
-
-    def validate(self, data):
-        """
-        Additional validation (if needed)
-        """
-        if not data.get("content"):
-            raise serializers.ValidationError("Content cannot be empty.")
-        return data
+        fields = "__all__"

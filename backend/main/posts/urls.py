@@ -1,13 +1,34 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import PostViewSet, CommentViewSet
+# urls.py
 
-# Create a router and register viewsets
-router = DefaultRouter()
-router.register(r"posts", PostViewSet, basename="post")
-router.register(r"comments", CommentViewSet, basename="comment")
+from django.urls import path
+from .views import (
+    PostCreateView,
+    PostListView,
+    PostDetailView,
+    PostUpdateView,
+    PostDeleteView,
+)
+from .views import (
+    CommentCreateView,
+    CommentListView,
+    CommentDetailView,
+    CommentUpdateView,
+    CommentDeleteView,
+)
 
-# Define the URL patterns that map to the viewsets
 urlpatterns = [
-    path("", include(router.urls)),  # This includes all the generated routes
+    path("", PostListView.as_view(), name="post-list"),
+    path("create/", PostCreateView.as_view(), name="post-create"),
+    path("<int:pk>/", PostDetailView.as_view(), name="post-detail"),
+    path("<int:pk>/update/", PostUpdateView.as_view(), name="post-update"),
+    path("<int:pk>/delete/", PostDeleteView.as_view(), name="post-delete"),
+    path("comments/", CommentListView.as_view(), name="comment-list"),
+    path("comments/create/", CommentCreateView.as_view(), name="comment-create"),
+    path("comments/<int:pk>/", CommentDetailView.as_view(), name="comment-detail"),
+    path(
+        "comments/<int:pk>/update/", CommentUpdateView.as_view(), name="comment-update"
+    ),
+    path(
+        "comments/<int:pk>/delete/", CommentDeleteView.as_view(), name="comment-delete"
+    ),
 ]

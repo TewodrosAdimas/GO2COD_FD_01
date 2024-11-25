@@ -1,51 +1,71 @@
-from rest_framework import viewsets, permissions
-from rest_framework.response import Response
-from rest_framework import status
+# views.py
+
+from rest_framework import generics
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsAuthor
+from django.utils import timezone
 
 
-# Viewset for Post model
-class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
+class PostCreateView(generics.CreateAPIView):
     serializer_class = PostSerializer
-    permission_classes = [
-        IsOwnerOrReadOnly
-    ]  # Custom permission to allow users to modify their posts only
 
     def perform_create(self, serializer):
-        # Automatically assign the current user as the author when creating a post
+        # Automatically set the logged-in user (CustomUser) as the author
         serializer.save(author=self.request.user)
 
-    def get_queryset(self):
-        """
-        Optionally restricts the returned posts to the currently authenticated user's posts.
-        """
-        queryset = Post.objects.all()
-        if self.request.user.is_authenticated:
-            queryset = queryset.filter(author=self.request.user)
-        return queryset
+
+class PostListView(generics.ListAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
 
 
-# Viewset for Comment model
-class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
+class PostDetailView(generics.RetrieveAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+
+
+class PostUpdateView(generics.UpdateAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthor]  # Ensure only the author can update
+
+    def perform_update(self, serializer):
+        serializer.save(updated_at=timezone.now())
+
+
+class PostDeleteView(generics.DestroyAPIView):
+    queryset = Post.objects.all()
+    permission_classes = [IsAuthor]  # Ensure only the author can delete
+
+
+class CommentCreateView(generics.CreateAPIView):
     serializer_class = CommentSerializer
-    permission_classes = [
-        IsOwnerOrReadOnly
-    ]  # Custom permission to allow users to modify their comments only
 
     def perform_create(self, serializer):
-        # Automatically assign the current user as the author when creating a comment
-        post = Post.objects.get(pk=self.request.data.get("post"))
-        serializer.save(author=self.request.user, post=post)
+        # Automatically set the logged-in user (CustomUser) as the author
+        serializer.save(author=self.request.user)
 
-    def get_queryset(self):
-        """
-        Optionally restricts the returned comments to the currently authenticated user's comments.
-        """
-        queryset = Comment.objects.all()
-        if self.request.user.is_authenticated:
-            queryset = queryset.filter(author=self.request.user)
-        return queryset
+
+class CommentListView(generics.ListAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+
+class CommentDetailView(generics.RetrieveAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+
+class CommentUpdateView(generics.UpdateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthor]  # Ensure only the author can update
+
+    def perform_update(self, serializer):
+        serializer.save(updated_at=timezone.now())
+
+
+class CommentDeleteView(generics.DestroyAPIView):
+    queryset = Comment.objects.all()
+    permission_classes = [IsAuthor]  # Ensure only the author can delete
