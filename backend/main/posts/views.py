@@ -6,6 +6,42 @@ from .serializers import PostSerializer, CommentSerializer
 from .permissions import IsAuthor
 from django.utils import timezone
 from taggit.models import Tag
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.db.models import Q
+
+
+class UserFeedView(APIView):
+    """
+    View to return the feed of posts from users that the currently authenticated user follows.
+    The posts will be ordered by creation date (most recent first).
+    Only authenticated users can access this view.
+    """
+
+    permission_classes = [
+        IsAuthenticated
+    ]  # Only authenticated users can access this view
+
+    def get(self, request):
+        """
+        Get the posts from the users that the authenticated user follows, ordered by creation date.
+        """
+        user = request.user  # The currently authenticated user
+
+        # Get the users the authenticated user follows
+        followed_users = user.following.all()
+
+        # Get the posts from the followed users, ordered by creation date (most recent first)
+        posts = Post.objects.filter(Q(author__in=followed_users)).order_by(
+            "-created_at"
+        )  # Assuming 'created_at' is the field for post creation time
+
+        # Serialize the posts using the PostSerializer
+        serializer = PostSerializer(posts, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class PostCreateView(generics.CreateAPIView):

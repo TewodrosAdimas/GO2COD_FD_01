@@ -375,5 +375,102 @@ GET /posts/?tag=django,python
   }
 ]
 ```
+Here’s the API documentation for the **User Feed** feature:
+
+---
+
+## **User Feed API**
+
+### **Endpoint**:
+`GET /feed/`
+
+### **Description**:
+This endpoint retrieves a feed of posts from users that the currently authenticated user follows. The posts are ordered by their creation date, with the most recent posts shown first.
+
+### **Permissions**:
+- **Authentication Required**: Yes (Authenticated users only)
+- **Permissions**: Only the authenticated user can access their feed.
+
+### **Request Headers**:
+- **Authorization**: Bearer token of the authenticated user (e.g., `Authorization: Bearer <auth_token>`).
+
+### **Request Parameters**:
+- **None** (No query parameters required)
+
+### **Response**:
+
+- **Status Code**: `200 OK` (success)
+- **Content-Type**: `application/json`
+
+#### **Response Body** (Success):
+```json
+[
+    {
+        "id": 1,
+        "title": "Post Title 1",
+        "content": "Content of the post",
+        "author": "john_doe",
+        "created_at": "2024-11-25T10:00:00Z"
+    },
+    {
+        "id": 2,
+        "title": "Post Title 2",
+        "content": "Content of another post",
+        "author": "jane_doe",
+        "created_at": "2024-11-24T08:00:00Z"
+    }
+]
+```
+
+#### **Response Fields**:
+- **id**: Unique identifier of the post.
+- **title**: Title of the post.
+- **content**: Content of the post.
+- **author**: The username of the post's author.
+- **created_at**: The date and time the post was created, in ISO 8601 format.
+
+### **Response Codes**:
+
+- **200 OK**: Successfully retrieved the feed of posts.
+- **401 Unauthorized**: The request is missing a valid `Authorization` token, or the token is invalid.
+- **404 Not Found**: This status will not be encountered for this endpoint since it retrieves posts from users that the authenticated user follows.
+
+### **Example Request**:
+```bash
+GET /feed/ HTTP/1.1
+Host: api.example.com
+Authorization: Bearer <auth_token>
+```
+
+### **Example Response**:
+```json
+[
+    {
+        "id": 1,
+        "title": "Post Title 1",
+        "content": "Content of the post",
+        "author": "john_doe",
+        "created_at": "2024-11-25T10:00:00Z"
+    },
+    {
+        "id": 2,
+        "title": "Post Title 2",
+        "content": "Content of another post",
+        "author": "jane_doe",
+        "created_at": "2024-11-24T08:00:00Z"
+    }
+]
+```
+
+---
+
+### **Notes**:
+- The feed is ordered by the **`created_at`** timestamp, with the most recent posts appearing first.
+- Only posts from users that the authenticated user follows are included in the feed.
+- The **Authorization** header must contain a valid Bearer token representing the authenticated user.
+
+This API provides a personalized feed experience based on the users the current user follows.
+
+---
 
 ---

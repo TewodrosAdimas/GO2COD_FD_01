@@ -14,6 +14,7 @@ from .views import (
     CommentDetailView,
     CommentUpdateView,
     CommentDeleteView,
+    UserFeedView,
 )
 
 urlpatterns = [
@@ -31,4 +32,5 @@ urlpatterns = [
     path(
         "comments/<int:pk>/delete/", CommentDeleteView.as_view(), name="comment-delete"
     ),
+    path("feed/", UserFeedView.as_view(), name="user_feed"),
 ]
