@@ -3,13 +3,12 @@ from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser
 
 
-class CustomUserAdmin(UserAdmin):
-    fieldsets = UserAdmin.fieldsets + (
-        ("Additional Info", {"fields": ("bio", "profile_picture", "followers")}),
-    )
-    add_fieldsets = UserAdmin.add_fieldsets + (
-        ("Additional Info", {"fields": ("bio", "profile_picture")}),
-    )
+class CustomUserAdmin(admin.ModelAdmin):
+    list_display = ("username", "email", "bio", "follower_count")
+    search_fields = ("username", "email")
+    filter_horizontal = (
+        "following",
+    )  # This will make the following field a multiple select box
 
 
 admin.site.register(CustomUser, CustomUserAdmin)

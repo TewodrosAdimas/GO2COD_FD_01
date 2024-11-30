@@ -4,7 +4,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
-from .serializers import LoginSerializer, UserRegistrationSerializer
+from .serializers import (
+    LoginSerializer,
+    UserRegistrationSerializer,
+    CustomUserSerializer,
+)
 from rest_framework.permissions import AllowAny  # This allows unauthenticated access
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from django.shortcuts import get_object_or_404
@@ -18,7 +22,9 @@ class AllUsersProfileView(APIView):
 
     def get(self, request, *args, **kwargs):
         users = CustomUser.objects.all()  # Fetch all users
-        serializer = UserRegistrationSerializer(users, many=True)  # Serialize user data
+        serializer = CustomUserSerializer(
+            users, many=True
+        )  # Serialize user data with follower_count
         return Response(serializer.data)  # Return the serialized data as a response
 
 
@@ -83,22 +89,13 @@ class UserProfileView(APIView):
 
     def get(self, request):
         """
-        Return the profile of the authenticated user.
+        Return the profile of the authenticated user along with follower count.
         """
         serializer = UserRegistrationSerializer(request.user)
-        return Response(serializer.data)
-
-    def put(self, request):
-        """
-        Update the profile of the authenticated user.
-        """
-        serializer = UserRegistrationSerializer(
-            request.user, data=request.data, partial=True
-        )
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "Profile updated successfully!"})
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Add follower_count to the response data
+        user_data = serializer.data
+        user_data["follower_count"] = request.user.follower_count
+        return Response(user_data)
 
 
 class FollowUserView(APIView):

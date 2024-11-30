@@ -9,6 +9,7 @@ interface ProfileData {
   email: string;
   bio: string | null;
   profile_picture: string | null;
+  follower_count: number; // Add follower_count to the ProfileData interface
 }
 
 const Profile = () => {
@@ -74,6 +75,9 @@ const Profile = () => {
                 </p>
                 <p className="card-text">
                   <strong>Bio:</strong> {profileData.bio || "No bio available"}
+                </p>
+                <p className="card-text">
+                  <strong>Followers:</strong> {profileData.follower_count}
                 </p>
                 <Link to="/profile/edit" className="btn btn-primary mt-3">
                   Edit Profile

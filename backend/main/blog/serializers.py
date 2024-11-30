@@ -33,3 +33,11 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(
         required=True, write_only=True
     )  # Mandatory and hidden in responses
+
+
+class CustomUserSerializer(serializers.ModelSerializer):
+    follower_count = serializers.ReadOnlyField()
+
+    class Meta:
+        model = CustomUser
+        fields = ["username", "email", "bio", "profile_picture", "follower_count"]

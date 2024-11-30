@@ -13,10 +13,10 @@ class CustomUser(AbstractUser):
         "self", symmetrical=False, related_name="followers", blank=True
     )
 
-    def __str__(self):
-        return self.username
-
     @property
     def follower_count(self):
         """Method to count the number of followers."""
         return self.followers.count()
+
+    def __str__(self):
+        return self.username
