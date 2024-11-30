@@ -5,9 +5,15 @@ from .views import (
     UserProfileView,
     FollowUserView,
     UnfollowUserView,
+    AllUsersProfileView,
 )
 
 urlpatterns = [
+    path(
+        "all_profiles/",
+        AllUsersProfileView.as_view(),
+        name="all_user_profiles",
+    ),
     path("register/", UserRegistrationView.as_view(), name="user-register"),
     path("login/", LoginView.as_view(), name="user-login"),
     path("profile/", UserProfileView.as_view(), name="user-profile"),

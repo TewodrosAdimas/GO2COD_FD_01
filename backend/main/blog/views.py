@@ -13,6 +13,15 @@ from notifications.models import Notification
 from django.contrib.contenttypes.models import ContentType
 
 
+class AllUsersProfileView(APIView):
+    permission_classes = [IsAuthenticated]  # Only authenticated users can access
+
+    def get(self, request, *args, **kwargs):
+        users = CustomUser.objects.all()  # Fetch all users
+        serializer = UserRegistrationSerializer(users, many=True)  # Serialize user data
+        return Response(serializer.data)  # Return the serialized data as a response
+
+
 class UserRegistrationView(APIView):
     permission_classes = [
         AllowAny
