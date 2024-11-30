@@ -32,11 +32,13 @@ INSTALLED_APPS = [
     "posts",
     "taggit",
     "notifications",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -132,3 +134,5 @@ REST_FRAMEWORK = {
 # Media files settings
 MEDIA_URL = "/media/"  # URL for accessing media files
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")  # Directory where media files are stored
+
+CORS_ALLOW_ALL_ORIGINS = True

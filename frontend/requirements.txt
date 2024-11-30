@@ -1,0 +1,5 @@
+vite@latest
+axios
+jwt-decode
+react react-dom
+react-router-dom
