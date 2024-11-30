@@ -1,0 +1,95 @@
+.profile-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .profile-info {
+    text-align: center;
+  }
+  
+  .profile-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .edit-form {
+    display: grid;
+    gap: 15px;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .error {
+    color: red;
+  }
+  
+  .btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .btn:hover {
+    background-color: #0056b3;
+  }
+  
+
+  .profile-container {
+  margin: 2rem auto;
+  max-width: 700px;
+}
+
+.profile-card {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.profile-picture {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  text-align: center;
+}
+
+
+
+
+
+
+
+.edit-profile-container {
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.profile-picture-preview {
+  width: 200px; /* Set a smaller width */
+  height: 200px; /* Set a smaller height */
+  object-fit: cover; /* Ensure the picture fits well */
+  border-radius: 50%; /* Make it circular */
+  border: 2px solid #ddd; /* Add a border for better aesthetics */
+  margin: 10px 0; /* Add spacing */
+}
+
+form {
+  background-color: #f9f9f9;
+  padding: 20px; /* Add padding for better spacing */
+}
+
+.text-danger {
+  color: #dc3545;
+}
