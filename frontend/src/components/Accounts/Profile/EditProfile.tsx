@@ -2,6 +2,13 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Styles.css"; // Import CSS styles
 
+interface ProfileData {
+  username: string;
+  email: string;
+  bio: string | null;
+  profile_picture: string | null;
+}
+
 const EditProfile = () => {
   const [formData, setFormData] = useState({
     username: "",
@@ -9,7 +16,7 @@ const EditProfile = () => {
     bio: "",
   });
   const [file, setFile] = useState<File | null>(null);
-  const [profileData, setProfileData] = useState<any>(null); // Store fetched profile data
+  const [profileData, setProfileData] = useState<ProfileData | null>(null); // Store fetched profile data
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -17,7 +24,7 @@ const EditProfile = () => {
 
     if (token) {
       axios
-        .get("http://localhost:8000/accounts/profile/", {
+        .get<ProfileData>("http://localhost:8000/accounts/profile/", {
           headers: {
             Authorization: `Token ${token}`,
           },
@@ -74,7 +81,7 @@ const EditProfile = () => {
       }
 
       try {
-        const response = await axios.put(
+        const response = await axios.put<ProfileData>(
           "http://localhost:8000/accounts/profile/",
           formDataToSubmit,
           {

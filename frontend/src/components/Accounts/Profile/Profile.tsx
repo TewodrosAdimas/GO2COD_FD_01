@@ -3,8 +3,16 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import "./Styles.css"; // Import the CSS file for additional styling
 
+// Define the type for profile data
+interface ProfileData {
+  username: string;
+  email: string;
+  bio: string | null;
+  profile_picture: string | null;
+}
+
 const Profile = () => {
-  const [profileData, setProfileData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -13,13 +21,13 @@ const Profile = () => {
 
     if (token) {
       axios
-        .get("http://localhost:8000/accounts/profile/", {
+        .get<ProfileData>("http://localhost:8000/accounts/profile/", {
           headers: {
             Authorization: `Token ${token}`,
           },
         })
         .then((response) => {
-          setProfileData(response.data);
+          setProfileData(response.data); // No need for explicit AxiosResponse
           setLoading(false);
         })
         .catch((err) => {
@@ -33,6 +41,7 @@ const Profile = () => {
     }
   }, []);
 
+  // Handle profile picture URL
   const profilePictureUrl = profileData?.profile_picture
     ? `http://localhost:8000${profileData.profile_picture}`
     : "https://via.placeholder.com/150";
