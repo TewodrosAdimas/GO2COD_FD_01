@@ -8,6 +8,7 @@ from .serializers import (
     LoginSerializer,
     UserRegistrationSerializer,
     CustomUserSerializer,
+    UserProfileSerializer,
 )
 from rest_framework.permissions import AllowAny  # This allows unauthenticated access
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
@@ -20,12 +21,14 @@ from django.contrib.contenttypes.models import ContentType
 class AllUsersProfileView(APIView):
     permission_classes = [IsAuthenticated]  # Only authenticated users can access
 
-    def get(self, request, *args, **kwargs):
-        users = CustomUser.objects.all()  # Fetch all users
-        serializer = CustomUserSerializer(
-            users, many=True
-        )  # Serialize user data with follower_count
-        return Response(serializer.data)  # Return the serialized data as a response
+    def get(self, request):
+        users = CustomUser.objects.exclude(
+            id=request.user.id
+        )  # Exclude the logged-in user
+        serializer = UserProfileSerializer(
+            users, many=True, context={"request": request}
+        )
+        return Response(serializer.data)
 
 
 class UserRegistrationView(APIView):

@@ -1,22 +1,21 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "./AllProfiles.css"; // Import the custom CSS file for additional styling
+import "./AllProfiles.css"; // Custom CSS for styling
 
 interface User {
   username: string;
   email: string;
   bio: string | null;
   profile_picture: string | null;
+  is_following: boolean; // Ensure the backend provides this field
 }
 
 const AllProfiles = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [followStatus, setFollowStatus] = useState<{ [key: string]: boolean }>(
-    {}
-  ); // Store follow status of users
 
+  // Fetch profiles and their follow status
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
     if (token) {
@@ -48,37 +47,17 @@ const AllProfiles = () => {
       : "https://via.placeholder.com/150";
   };
 
-  const handleFollow = (username: string) => {
+  // Toggle follow/unfollow status
+  const toggleFollow = (username: string, isCurrentlyFollowing: boolean) => {
     const token = localStorage.getItem("auth_token");
     if (token) {
-      axios
-        .post(
-          `http://localhost:8000/accounts/follow/${username}/`,
-          {},
-          {
-            headers: {
-              Authorization: `Token ${token}`,
-            },
-          }
-        )
-        .then(() => {
-          setFollowStatus((prevStatus) => ({
-            ...prevStatus,
-            [username]: true,
-          }));
-        })
-        .catch((err) => {
-          console.error("Error following user:", err);
-        });
-    }
-  };
+      const url = isCurrentlyFollowing
+        ? `http://localhost:8000/accounts/unfollow/${username}/`
+        : `http://localhost:8000/accounts/follow/${username}/`;
 
-  const handleUnfollow = (username: string) => {
-    const token = localStorage.getItem("auth_token");
-    if (token) {
       axios
         .post(
-          `http://localhost:8000/accounts/unfollow/${username}/`,
+          url,
           {},
           {
             headers: {
@@ -87,13 +66,17 @@ const AllProfiles = () => {
           }
         )
         .then(() => {
-          setFollowStatus((prevStatus) => ({
-            ...prevStatus,
-            [username]: false,
-          }));
+          // Update local state to reflect the change
+          setUsers((prevUsers) =>
+            prevUsers.map((user) =>
+              user.username === username
+                ? { ...user, is_following: !isCurrentlyFollowing }
+                : user
+            )
+          );
         })
         .catch((err) => {
-          console.error("Error unfollowing user:", err);
+          console.error("Error toggling follow status:", err);
         });
     }
   };
@@ -125,21 +108,14 @@ const AllProfiles = () => {
                 </p>
 
                 {/* Follow/Unfollow button */}
-                {followStatus[user.username] ? (
-                  <button
-                    className="btn btn-danger w-100"
-                    onClick={() => handleUnfollow(user.username)}
-                  >
-                    Unfollow
-                  </button>
-                ) : (
-                  <button
-                    className="btn btn-primary w-100"
-                    onClick={() => handleFollow(user.username)}
-                  >
-                    Follow
-                  </button>
-                )}
+                <button
+                  className={`btn ${
+                    user.is_following ? "btn-danger" : "btn-primary"
+                  } w-100`}
+                  onClick={() => toggleFollow(user.username, user.is_following)}
+                >
+                  {user.is_following ? "Unfollow" : "Follow"}
+                </button>
               </div>
             </div>
           </div>
