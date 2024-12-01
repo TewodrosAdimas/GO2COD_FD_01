@@ -30,26 +30,34 @@ const Posts = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState<number>(1); // Current page state
   const [hasNextPage, setHasNextPage] = useState<boolean>(true); // Check if there's a next page
+  const [seenPostIds, setSeenPostIds] = useState<Set<number>>(new Set()); // Track seen post IDs
 
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
     if (token) {
+      setLoading(true); // Start loading when fetching a new page
       axios
-        .get<PaginatedResponse<Post>>(
-          `http://localhost:8000/posts/?page=${page}`,
-          {
-            headers: {
-              Authorization: `Token ${token}`,
-            },
-          }
-        )
+        .get<PaginatedResponse<Post>>(`http://localhost:8000/posts/?page=${page}`, {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        })
         .then((response) => {
           const postData = response.data.results; // Paginated results are in `results`
-          setPosts((prevPosts) => [...prevPosts, ...postData]); // Append new posts to existing ones
+          
+          // Filter out posts that have already been fetched
+          const newPosts = postData.filter(post => !seenPostIds.has(post.id));
+
+          // If there are new posts, update the state
+          if (newPosts.length > 0) {
+            setPosts((prevPosts) => (page === 1 ? newPosts : [...prevPosts, ...newPosts])); // Append new posts on next pages
+            setSeenPostIds((prevSeen) => new Set([...prevSeen, ...newPosts.map(post => post.id)])); // Mark these posts as seen
+          }
+
           setHasNextPage(response.data.next !== null); // Check if there are more pages
 
           // Fetch user data for each post
-          postData.forEach((post: Post) => {
+          newPosts.forEach((post: Post) => {
             if (!users.has(post.author)) {
               axios
                 .get<User>(`http://localhost:8000/accounts/${post.author}/`, {
@@ -68,18 +76,18 @@ const Posts = () => {
             }
           });
 
-          setLoading(false);
+          setLoading(false); // End loading when fetch is done
         })
         .catch((err) => {
           console.error("Error fetching posts:", err);
           setError("Error fetching posts.");
-          setLoading(false);
+          setLoading(false); // End loading on error
         });
     } else {
       setError("No token found. Please log in.");
-      setLoading(false);
+      setLoading(false); // End loading if no token is found
     }
-  }, [page]); // Re-fetch posts whenever page number changes
+  }, [page, seenPostIds]); // Re-fetch posts whenever page number or seenPostIds changes
 
   const handleScroll = (event: React.UIEvent<HTMLElement>) => {
     const bottom =
@@ -94,9 +102,7 @@ const Posts = () => {
     <div className="container my-5" onScroll={handleScroll}>
       <h2 className="text-center mb-4">Posts</h2>
 
-      {loading && (
-        <p className="text-center text-secondary">Loading posts...</p>
-      )}
+      {loading && <p className="text-center text-secondary">Loading posts...</p>}
       {error && <p className="text-danger text-center">{error}</p>}
 
       <div className="row row-cols-1 row-cols-md-3 g-4">
