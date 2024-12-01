@@ -4,7 +4,8 @@ import Login from "./components/Accounts/Login/Login";
 import EditProfile from "./components/Accounts/Profile/EditProfile";
 import Profile from "./components/Accounts/Profile/Profile";
 import AllProfiles from "./components/Accounts/Profile/AllUsers";
-import Posts from "./components/Posts/Posts";
+import Posts from "./components/Posts/ListPost/Posts";
+import CreatePost from "./components/Posts/CreatePost/CreatePost";
 
 const App = () => {
   return (
@@ -16,6 +17,8 @@ const App = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/all_profiles" element={<AllProfiles />} />
         <Route path="/posts" element={<Posts />} />
+        <Route path="/posts/create" element={<CreatePost />} />{" "}
+        {/* New route for CreatePost */}
       </Routes>
     </Router>
   );

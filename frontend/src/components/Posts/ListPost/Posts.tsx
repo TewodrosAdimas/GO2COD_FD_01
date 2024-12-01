@@ -98,6 +98,12 @@ const Posts = () => {
     }
   }, [page, seenPostIds]); // Re-fetch posts whenever page number or seenPostIds changes
 
+  const profilePictureUrl = (profile_picture: string | null) => {
+    return profile_picture
+      ? `http://localhost:8000${profile_picture}`
+      : "https://via.placeholder.com/500";
+  };
+
   const handleScroll = (event: React.UIEvent<HTMLElement>) => {
     const bottom =
       event.currentTarget.scrollHeight ===
@@ -111,9 +117,9 @@ const Posts = () => {
     setExpandedPosts((prevExpanded) => {
       const updated = new Set(prevExpanded);
       if (updated.has(postId)) {
-        updated.delete(postId);
+        updated.delete(postId); // Remove post from expanded set to collapse it
       } else {
-        updated.add(postId);
+        updated.add(postId); // Add post to expanded set to expand it
       }
       return updated;
     });
@@ -144,13 +150,13 @@ const Posts = () => {
                   <h5 className="card-title">{post.title}</h5>
                   <p className="card-text">
                     {truncatedContent}
-                    {post.content.length > 50 && !isExpanded && (
+                    {post.content.length > 50 && (
                       <span
                         className="text-primary"
                         style={{ cursor: "pointer" }}
                         onClick={() => toggleExpand(post.id)}
                       >
-                        See more
+                        {isExpanded ? "See less" : "See more"}
                       </span>
                     )}
                   </p>
@@ -158,11 +164,10 @@ const Posts = () => {
                     {user ? (
                       <div>
                         <img
-                          src={user.profile_picture || "/default-profile.png"}
+                          src={profilePictureUrl(user.profile_picture)}
                           alt="Profile"
-                          className="rounded-circle"
-                          width="40"
-                          height="40"
+                          className="img-fluid rounded-circle profile-picture"
+                          style={{ width: "120px", height: "120px" }}
                         />
                         <strong>{user.username}</strong>
                       </div>

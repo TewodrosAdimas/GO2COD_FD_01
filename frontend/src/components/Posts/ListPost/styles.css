@@ -1,0 +1,204 @@
+/* General container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Post card styling */
+.post-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.post-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Card body */
+.card-body {
+  padding: 20px;
+  position: relative;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.card-text {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #555;
+  transition: color 0.3s ease;
+}
+
+/* See more / See less link */
+.card-text .text-primary {
+  font-weight: 600;
+  cursor: pointer;
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.card-text .text-primary:hover {
+  color: #0056b3;
+}
+
+/* Author profile section */
+.card-body .d-flex {
+  margin-top: 20px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-picture {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  margin-right: 15px;
+}
+
+.profile-picture:hover {
+  border: 2px solid #007bff;
+}
+
+strong {
+  font-size: 1.1rem;
+  color: #333;
+}
+
+/* Date */
+small.text-muted {
+  font-size: 0.9rem;
+  color: #777;
+}
+
+/* Tags */
+.card-footer .tags {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.card-footer .tags span {
+  background-color: #e0e0e0;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  margin-right: 10px;
+  margin-bottom: 5px;
+  color: #555;
+  transition: background-color 0.3s ease;
+}
+
+.card-footer .tags span:hover {
+  background-color: #007bff;
+  color: #fff;
+}
+
+/* Scroll behavior */
+.container {
+  padding-bottom: 50px;
+  position: relative;
+}
+
+button.btn-primary {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+button.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive design */
+@media (max-width: 767px) {
+  .row-cols-md-3 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-picture {
+    width: 50px;
+    height: 50px;
+  }
+
+  .card-body {
+    padding: 15px;
+  }
+
+  .card-title {
+    font-size: 1.3rem;
+  }
+
+  .card-text {
+    font-size: 0.95rem;
+  }
+
+  .tags span {
+    font-size: 0.85rem;
+    margin-right: 8px;
+  }
+}
+
+
+/* Author profile section */
+.card-body .d-flex {
+  margin-top: 20px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-picture {
+  width: 40px;  /* Reduced size */
+  height: 40px; /* Reduced size */
+  object-fit: cover;
+  margin-right: 15px;
+}
+
+.profile-picture:hover {
+  border: 2px solid #007bff;
+}
+
+strong {
+  font-size: 1.1rem;
+  color: #333;
+}
+
+/* Styling the date to be above the footer */
+.card-body .post-date {
+  font-size: 0.9rem;
+  color: #6c757d; /* Lighter gray color */
+  margin-top: 10px;
+  margin-bottom: 0; /* Remove space below */
+}
+
+.card-footer {
+  padding-top: 10px;
+}
+
+/* Styling the tags in the footer */
+.card-footer .tags span {
+  display: inline-block;
+  background-color: #f8f9fa;
+  border: 1px solid #007bff;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin: 5px;
+  font-size: 0.9rem;
+  color: #007bff;
+}
