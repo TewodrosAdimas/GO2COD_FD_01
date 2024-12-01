@@ -54,52 +54,73 @@ const CreatePost = () => {
   };
 
   return (
-    <div className="container">
-      <h2>Create New Post</h2>
-      {message && <p>{message}</p>} {/* Display success or error message */}
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="title">Title</label>
-          <input
-            type="text"
-            id="title"
-            className="form-control"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter post title"
-            required
-          />
-        </div>
+    <div className="container mt-5">
+      <div className="row justify-content-center">
+        <div className="col-md-8">
+          <div className="card shadow-lg">
+            <div className="card-header bg-primary text-white text-center">
+              <h3>Create New Post</h3>
+            </div>
+            <div className="card-body">
+              {message && (
+                <div
+                  className={`alert ${
+                    message.includes("success")
+                      ? "alert-success"
+                      : "alert-danger"
+                  }`}
+                  role="alert"
+                >
+                  {message}
+                </div>
+              )}
+              <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                  <label htmlFor="title">Title</label>
+                  <input
+                    type="text"
+                    id="title"
+                    className="form-control"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Enter post title"
+                    required
+                  />
+                </div>
 
-        <div className="form-group">
-          <label htmlFor="content">Content</label>
-          <textarea
-            id="content"
-            className="form-control"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Enter post content"
-            rows={5}
-            required
-          />
-        </div>
+                <div className="form-group mt-3">
+                  <label htmlFor="content">Content</label>
+                  <textarea
+                    id="content"
+                    className="form-control"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Enter post content"
+                    rows={5}
+                    required
+                  />
+                </div>
 
-        <div className="form-group">
-          <label htmlFor="tags">Tags (comma separated)</label>
-          <input
-            type="text"
-            id="tags"
-            className="form-control"
-            value={tags}
-            onChange={handleTagsChange}
-            placeholder="Enter post tags"
-          />
-        </div>
+                <div className="form-group mt-3">
+                  <label htmlFor="tags">Tags (comma separated)</label>
+                  <input
+                    type="text"
+                    id="tags"
+                    className="form-control"
+                    value={tags}
+                    onChange={handleTagsChange}
+                    placeholder="Enter post tags"
+                  />
+                </div>
 
-        <button type="submit" className="btn btn-primary">
-          Create Post
-        </button>
-      </form>
+                <button type="submit" className="btn btn-primary mt-4 w-100">
+                  Create Post
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
