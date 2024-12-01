@@ -31,27 +31,36 @@ const Posts = () => {
   const [page, setPage] = useState<number>(1); // Current page state
   const [hasNextPage, setHasNextPage] = useState<boolean>(true); // Check if there's a next page
   const [seenPostIds, setSeenPostIds] = useState<Set<number>>(new Set()); // Track seen post IDs
+  const [expandedPosts, setExpandedPosts] = useState<Set<number>>(new Set()); // Track expanded posts
 
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
     if (token) {
       setLoading(true); // Start loading when fetching a new page
       axios
-        .get<PaginatedResponse<Post>>(`http://localhost:8000/posts/?page=${page}`, {
-          headers: {
-            Authorization: `Token ${token}`,
-          },
-        })
+        .get<PaginatedResponse<Post>>(
+          `http://localhost:8000/posts/?page=${page}`,
+          {
+            headers: {
+              Authorization: `Token ${token}`,
+            },
+          }
+        )
         .then((response) => {
           const postData = response.data.results; // Paginated results are in `results`
-          
+
           // Filter out posts that have already been fetched
-          const newPosts = postData.filter(post => !seenPostIds.has(post.id));
+          const newPosts = postData.filter((post) => !seenPostIds.has(post.id));
 
           // If there are new posts, update the state
           if (newPosts.length > 0) {
-            setPosts((prevPosts) => (page === 1 ? newPosts : [...prevPosts, ...newPosts])); // Append new posts on next pages
-            setSeenPostIds((prevSeen) => new Set([...prevSeen, ...newPosts.map(post => post.id)])); // Mark these posts as seen
+            setPosts((prevPosts) =>
+              page === 1 ? newPosts : [...prevPosts, ...newPosts]
+            ); // Append new posts on next pages
+            setSeenPostIds(
+              (prevSeen) =>
+                new Set([...prevSeen, ...newPosts.map((post) => post.id)])
+            ); // Mark these posts as seen
           }
 
           setHasNextPage(response.data.next !== null); // Check if there are more pages
@@ -98,22 +107,53 @@ const Posts = () => {
     }
   };
 
+  const toggleExpand = (postId: number) => {
+    setExpandedPosts((prevExpanded) => {
+      const updated = new Set(prevExpanded);
+      if (updated.has(postId)) {
+        updated.delete(postId);
+      } else {
+        updated.add(postId);
+      }
+      return updated;
+    });
+  };
+
   return (
     <div className="container my-5" onScroll={handleScroll}>
       <h2 className="text-center mb-4">Posts</h2>
 
-      {loading && <p className="text-center text-secondary">Loading posts...</p>}
+      {loading && (
+        <p className="text-center text-secondary">Loading posts...</p>
+      )}
       {error && <p className="text-danger text-center">{error}</p>}
 
       <div className="row row-cols-1 row-cols-md-3 g-4">
         {posts.map((post) => {
           const user = users.get(post.author);
+          const isExpanded = expandedPosts.has(post.id);
+          const truncatedContent =
+            post.content.length > 50 && !isExpanded
+              ? post.content.substring(0, 50) + "..."
+              : post.content;
+
           return (
             <div className="col" key={post.id}>
               <div className="card shadow-sm post-card">
                 <div className="card-body">
                   <h5 className="card-title">{post.title}</h5>
-                  <p className="card-text">{post.content}</p>
+                  <p className="card-text">
+                    {truncatedContent}
+                    {post.content.length > 50 && !isExpanded && (
+                      <span
+                        className="text-primary"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => toggleExpand(post.id)}
+                      >
+                        See more
+                      </span>
+                    )}
+                  </p>
                   <div className="d-flex justify-content-between">
                     {user ? (
                       <div>
