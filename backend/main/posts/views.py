@@ -51,16 +51,10 @@ class UserFeedView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class PostCreateView(generics.CreateAPIView):
-    serializer_class = PostSerializer
-
-    def perform_create(self, serializer):
-        # Automatically set the logged-in user (CustomUser) as the author
-        serializer.save(author=self.request.user)
-
-
+# PostListView: No authentication required (public access)
 class PostListView(generics.ListAPIView):
     serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]  # No authentication required
 
     def get_queryset(self):
         queryset = Post.objects.all()
@@ -72,15 +66,27 @@ class PostListView(generics.ListAPIView):
         return queryset
 
 
+# PostCreateView: Requires authentication (only authenticated users can create posts)
+class PostCreateView(generics.CreateAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]  # Requires authentication
+
+    def perform_create(self, serializer):
+        # Automatically set the logged-in user (CustomUser) as the author
+        serializer.save(author=self.request.user)
+
+
 class PostDetailView(generics.RetrieveAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = []  # No authentication required for viewing post details
 
 
 class PostUpdateView(generics.UpdateAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthor]  # Ensure only the author can update
+    # Use the custom permission `IsAuthor` to restrict access
 
     def perform_update(self, serializer):
         serializer.save(updated_at=timezone.now())
@@ -88,7 +94,7 @@ class PostUpdateView(generics.UpdateAPIView):
 
 class PostDeleteView(generics.DestroyAPIView):
     queryset = Post.objects.all()
-    permission_classes = [IsAuthor]  # Ensure only the author can delete
+    permission_classes = [IsAuthor]  # Ensure only the author can delete the post
 
 
 class CommentCreateView(generics.CreateAPIView):
