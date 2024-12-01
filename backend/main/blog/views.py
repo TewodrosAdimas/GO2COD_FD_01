@@ -18,6 +18,16 @@ from notifications.models import Notification
 from django.contrib.contenttypes.models import ContentType
 
 
+class UserDetailView(APIView):
+    def get(self, request, pk, format=None):
+        try:
+            user = CustomUser.objects.get(pk=pk)
+            serializer = UserProfileSerializer(user)
+            return Response(serializer.data)
+        except CustomUser.DoesNotExist:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
 class AllUsersProfileView(APIView):
     permission_classes = [IsAuthenticated]  # Only authenticated users can access
 

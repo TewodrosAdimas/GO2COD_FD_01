@@ -18,6 +18,7 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import Post, Like
 from blog.models import CustomUser
+from rest_framework.pagination import PageNumberPagination
 
 
 class UserFeedView(APIView):
@@ -51,10 +52,19 @@ class UserFeedView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# PostListView: No authentication required (public access)
+# Define a custom pagination class
+class PostListPagination(PageNumberPagination):
+    page_size = 5  # Set page size to 5
+    page_size_query_param = "page_size"
+    max_page_size = 100  # Limit maximum page size to 100
+
+
 class PostListView(generics.ListAPIView):
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]  # No authentication required
+    permission_classes = [
+        IsAuthenticated
+    ]  # Ensure user is authenticated to access posts
+    pagination_class = PostListPagination  # Set the custom pagination class
 
     def get_queryset(self):
         queryset = Post.objects.all()
