@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
-
-// Define interfaces for Post and User
+import UpdatePost from "../UpdatePost";
 interface Post {
   id: number;
   title: string;
   content: string;
   created_at: string;
-  author: number; // This links to the User's ID
+  author: number;
   tags: string[];
 }
 
@@ -28,51 +28,46 @@ const Posts = () => {
   const [users, setUsers] = useState<Map<number, User>>(new Map());
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState<number>(1); // Current page state
-  const [hasNextPage, setHasNextPage] = useState<boolean>(true); // Check if there's a next page
-  const [seenPostIds, setSeenPostIds] = useState<Set<number>>(new Set()); // Track seen post IDs
-  const [expandedPosts, setExpandedPosts] = useState<Set<number>>(new Set()); // Track expanded posts
+  const [page, setPage] = useState<number>(1);
+  const [hasNextPage, setHasNextPage] = useState<boolean>(true);
+  const [seenPostIds, setSeenPostIds] = useState<Set<number>>(new Set());
+  const [expandedPosts, setExpandedPosts] = useState<Set<number>>(new Set());
+  const [editingPostId, setEditingPostId] = useState<number | null>(null);
+
+  const loggedInUsername = localStorage.getItem("username");
 
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
     if (token) {
-      setLoading(true); // Start loading when fetching a new page
+      setLoading(true);
       axios
         .get<PaginatedResponse<Post>>(
           `http://localhost:8000/posts/?page=${page}`,
           {
-            headers: {
-              Authorization: `Token ${token}`,
-            },
+            headers: { Authorization: `Token ${token}` },
           }
         )
         .then((response) => {
-          const postData = response.data.results; // Paginated results are in `results`
-
-          // Filter out posts that have already been fetched
+          const postData = response.data.results;
           const newPosts = postData.filter((post) => !seenPostIds.has(post.id));
 
-          // If there are new posts, update the state
           if (newPosts.length > 0) {
             setPosts((prevPosts) =>
               page === 1 ? newPosts : [...prevPosts, ...newPosts]
-            ); // Append new posts on next pages
+            );
             setSeenPostIds(
               (prevSeen) =>
                 new Set([...prevSeen, ...newPosts.map((post) => post.id)])
-            ); // Mark these posts as seen
+            );
           }
 
-          setHasNextPage(response.data.next !== null); // Check if there are more pages
+          setHasNextPage(response.data.next !== null);
 
-          // Fetch user data for each post
           newPosts.forEach((post: Post) => {
             if (!users.has(post.author)) {
               axios
                 .get<User>(`http://localhost:8000/accounts/${post.author}/`, {
-                  headers: {
-                    Authorization: `Token ${token}`,
-                  },
+                  headers: { Authorization: `Token ${token}` },
                 })
                 .then((userResponse) => {
                   setUsers((prevUsers) =>
@@ -85,18 +80,18 @@ const Posts = () => {
             }
           });
 
-          setLoading(false); // End loading when fetch is done
+          setLoading(false);
         })
         .catch((err) => {
           console.error("Error fetching posts:", err);
           setError("Error fetching posts.");
-          setLoading(false); // End loading on error
+          setLoading(false);
         });
     } else {
       setError("No token found. Please log in.");
-      setLoading(false); // End loading if no token is found
+      setLoading(false);
     }
-  }, [page, seenPostIds]); // Re-fetch posts whenever page number or seenPostIds changes
+  }, [page, seenPostIds]);
 
   const profilePictureUrl = (profile_picture: string | null) => {
     return profile_picture
@@ -104,36 +99,47 @@ const Posts = () => {
       : "https://via.placeholder.com/500";
   };
 
-  const handleScroll = (event: React.UIEvent<HTMLElement>) => {
-    const bottom =
-      event.currentTarget.scrollHeight ===
-      event.currentTarget.scrollTop + event.currentTarget.clientHeight;
-    if (bottom && hasNextPage && !loading) {
-      setPage((prevPage) => prevPage + 1); // Go to the next page when scrolled to bottom
-    }
-  };
-
   const toggleExpand = (postId: number) => {
     setExpandedPosts((prevExpanded) => {
       const updated = new Set(prevExpanded);
       if (updated.has(postId)) {
-        updated.delete(postId); // Remove post from expanded set to collapse it
+        updated.delete(postId);
       } else {
-        updated.add(postId); // Add post to expanded set to expand it
+        updated.add(postId);
       }
       return updated;
     });
   };
 
-  return (
-    <div className="container my-5" onScroll={handleScroll}>
-      <h2 className="text-center mb-4">Posts</h2>
+  const handleSavePost = (updatedPost: Post) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) => (post.id === updatedPost.id ? updatedPost : post))
+    );
+    setEditingPostId(null);
+  };
 
+  const handleDeletePost = async (postId: number) => {
+    const token = localStorage.getItem("auth_token");
+    if (token) {
+      try {
+        await axios.delete(`http://localhost:8000/posts/${postId}/`, {
+          headers: { Authorization: `Token ${token}` },
+        });
+        setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+      } catch (error) {
+        console.error("Error deleting post:", error);
+        setError("Failed to delete post.");
+      }
+    }
+  };
+
+  return (
+    <div className="container my-5">
+      <h2 className="text-center mb-4">Posts</h2>
       {loading && (
         <p className="text-center text-secondary">Loading posts...</p>
       )}
       {error && <p className="text-danger text-center">{error}</p>}
-
       <div className="row row-cols-1 row-cols-md-3 g-4">
         {posts.map((post) => {
           const user = users.get(post.author);
@@ -145,53 +151,89 @@ const Posts = () => {
 
           return (
             <div className="col" key={post.id}>
-              <div className="card shadow-sm post-card">
-                <div className="card-body">
-                  <h5 className="card-title">{post.title}</h5>
-                  <p className="card-text">
-                    {truncatedContent}
-                    {post.content.length > 50 && (
-                      <span
-                        className="text-primary"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => toggleExpand(post.id)}
+              {editingPostId === post.id ? (
+                <UpdatePost
+                  post={post}
+                  onCancel={() => setEditingPostId(null)}
+                  onSave={handleSavePost}
+                />
+              ) : (
+                <div className="card shadow-sm post-card">
+                  <div className="card-body d-flex flex-column">
+                    <h5 className="card-title">
+                      {/* Wrap the post title in a Link */}
+                      <Link
+                        to={`/posts/${post.id}`}
+                        className="text-decoration-none"
                       >
-                        {isExpanded ? "See less" : "See more"}
-                      </span>
-                    )}
-                  </p>
-                  <div className="d-flex justify-content-between">
-                    {user ? (
-                      <div>
-                        <img
-                          src={profilePictureUrl(user.profile_picture)}
-                          alt="Profile"
-                          className="img-fluid rounded-circle profile-picture"
-                          style={{ width: "120px", height: "120px" }}
-                        />
-                        <strong>{user.username}</strong>
+                        {post.title}
+                      </Link>
+                    </h5>
+                    <p className="card-text">
+                      {truncatedContent}
+                      {post.content.length > 50 && (
+                        <span
+                          className="text-primary"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => toggleExpand(post.id)}
+                        >
+                          {isExpanded ? "See less" : "See more"}
+                        </span>
+                      )}
+                    </p>
+                    <div className="d-flex justify-content-between">
+                      {user ? (
+                        <div>
+                          <img
+                            src={profilePictureUrl(user.profile_picture)}
+                            alt="Profile"
+                            className="img-fluid rounded-circle profile-picture"
+                            style={{ width: "120px", height: "120px" }}
+                          />
+                          <strong>{user.username}</strong>
+                        </div>
+                      ) : (
+                        <p>Loading author...</p>
+                      )}
+                      <small className="text-muted ml-2">
+                        {new Date(post.created_at).toLocaleString()}
+                      </small>
+                    </div>
+
+                    {/* Move Edit and Delete buttons here */}
+                    {user && user.username === loggedInUsername && (
+                      <div className="mt-auto">
+                        <button
+                          onClick={() => {
+                            setEditingPostId(post.id);
+                          }}
+                          className="btn btn-primary btn-sm mt-2"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeletePost(post.id)}
+                          className="btn btn-danger btn-sm mt-2 ms-2"
+                        >
+                          Delete
+                        </button>
                       </div>
-                    ) : (
-                      <p>Loading author...</p>
                     )}
-                    <small className="text-muted ml-2">
-                      {new Date(post.created_at).toLocaleString()}
-                    </small>
+                  </div>
+
+                  <div className="card-footer">
+                    <div className="tags">
+                      {post.tags.map((tag, index) => (
+                        <span key={index}>{tag}</span>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <div className="card-footer">
-                  <div className="tags">
-                    {post.tags.map((tag, index) => (
-                      <span key={index}>{tag}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           );
         })}
       </div>
-
       {hasNextPage && !loading && (
         <div className="text-center">
           <button onClick={() => setPage(page + 1)} className="btn btn-primary">

@@ -37,16 +37,26 @@ const Login = () => {
         "http://localhost:8000/accounts/login/",
         formData
       );
-      if (response.status === 200) {
-        // Assuming the token is in the response data
-        localStorage.setItem("auth_token", response.data.token);
+  
+      // Assuming the backend sends token and username in response
+      const { token, username } = response.data;
+  
+      console.log("Token:", token);
+      console.log("Username:", username);  // Log the username to check if it's received correctly
+  
+      if (token && username) {
+        // Store both token and username in localStorage
+        localStorage.setItem("auth_token", token);
+        localStorage.setItem("username", username);
+  
+        // Redirect the user after successful login
         navigate("/profile");
+      } else {
+        setError("Invalid login response. Username or Token missing.");
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const axiosError = err as AxiosError;
-
-        // Handle Axios error gracefully
         if (axiosError.response?.data) {
           const responseData = axiosError.response.data as ErrorResponse;
           setError(responseData.error || "Something went wrong");
@@ -58,7 +68,7 @@ const Login = () => {
       }
     }
   };
-
+  
   return (
     <div>
       <h2>Login</h2>

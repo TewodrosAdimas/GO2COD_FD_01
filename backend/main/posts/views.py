@@ -95,7 +95,10 @@ class PostDetailView(generics.RetrieveAPIView):
 class PostUpdateView(generics.UpdateAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = [IsAuthor]  # Ensure only the author can update
+    permission_classes = [
+        IsAuthenticated,
+        IsAuthor,
+    ]  # Ensure only the author can update
     # Use the custom permission `IsAuthor` to restrict access
 
     def perform_update(self, serializer):
@@ -104,7 +107,11 @@ class PostUpdateView(generics.UpdateAPIView):
 
 class PostDeleteView(generics.DestroyAPIView):
     queryset = Post.objects.all()
-    permission_classes = [IsAuthor]  # Ensure only the author can delete the post
+    serializer_class = PostSerializer
+    permission_classes = [
+        IsAuthenticated,
+        IsAuthor,
+    ]  # Ensure only the author can update
 
 
 class CommentCreateView(generics.CreateAPIView):
