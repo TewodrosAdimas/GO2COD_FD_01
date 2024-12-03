@@ -522,7 +522,7 @@ These endpoints allow users to like and unlike posts. Only authenticated users c
 
 #### 2. Unlike a Post
 
-- **URL**: `/api/posts/unlike/<post_id>/`
+- **URL**: `/posts/unlike/<post_id>/`
 - **Method**: `POST`
 - **Authentication**: Required (User must be logged in)
 - **Parameters**:

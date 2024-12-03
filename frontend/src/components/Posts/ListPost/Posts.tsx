@@ -10,7 +10,8 @@ interface Post {
   created_at: string;
   author: number;
   tags: string[];
-  like_count: number; // Add like_count to post data
+  is_liked: boolean;
+  like_count: number;
 }
 
 interface User {
@@ -36,7 +37,7 @@ const Posts = () => {
   const [expandedPosts, setExpandedPosts] = useState<Set<number>>(new Set());
   const [editingPostId, setEditingPostId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
-
+  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
   const loggedInUsername = localStorage.getItem("username");
 
   const fetchPosts = () => {
@@ -44,10 +45,8 @@ const Posts = () => {
     if (token) {
       setLoading(true);
       let url = `http://localhost:8000/posts/?page=${page}`;
+      if (searchQuery) url += `&tag=${searchQuery}`;
 
-      if (searchQuery) {
-        url += `&tag=${searchQuery}`;
-      }
       axios
         .get<PaginatedResponse<Post>>(url, {
           headers: { Authorization: `Token ${token}` },
@@ -65,6 +64,15 @@ const Posts = () => {
                 new Set([...prevSeen, ...newPosts.map((post) => post.id)])
             );
           }
+
+          // Update the likedPosts set based on the response data
+          newPosts.forEach((post: Post) => {
+            if (post.is_liked) {
+              setLikedPosts((prevLikedPosts) =>
+                new Set(prevLikedPosts).add(post.id)
+              );
+            }
+          });
 
           setHasNextPage(response.data.next !== null);
 
@@ -100,7 +108,7 @@ const Posts = () => {
 
   useEffect(() => {
     fetchPosts();
-  }, [page, searchQuery, seenPostIds]);
+  }, [page, searchQuery]);
 
   const profilePictureUrl = (profile_picture: string | null) => {
     return profile_picture
@@ -111,11 +119,7 @@ const Posts = () => {
   const toggleExpand = (postId: number) => {
     setExpandedPosts((prevExpanded) => {
       const updated = new Set(prevExpanded);
-      if (updated.has(postId)) {
-        updated.delete(postId);
-      } else {
-        updated.add(postId);
-      }
+      updated.has(postId) ? updated.delete(postId) : updated.add(postId);
       return updated;
     });
   };
@@ -146,24 +150,48 @@ const Posts = () => {
     const token = localStorage.getItem("auth_token");
     if (token) {
       try {
-        await axios.post(
-          `http://localhost:8000/posts/like/${postId}/`, // Corrected URL structure
-          {},
-          {
-            headers: { Authorization: `Token ${token}` },
-          }
-        );
-        // Optionally, you can update the local state to reflect the like action
-        setPosts((prevPosts) =>
-          prevPosts.map((post) =>
-            post.id === postId
-              ? { ...post, like_count: post.like_count + 1 }
-              : post
-          )
-        );
+        if (likedPosts.has(postId)) {
+          setLikedPosts((prevLikedPosts) => {
+            const updated = new Set(prevLikedPosts);
+            updated.delete(postId);
+            return updated;
+          });
+          setPosts((prevPosts) =>
+            prevPosts.map((post) =>
+              post.id === postId
+                ? { ...post, like_count: post.like_count - 1 }
+                : post
+            )
+          );
+          await axios.post(
+            `http://localhost:8000/posts/unlike/${postId}/`,
+            {},
+            {
+              headers: { Authorization: `Token ${token}` },
+            }
+          );
+        } else {
+          setLikedPosts((prevLikedPosts) =>
+            new Set(prevLikedPosts).add(postId)
+          );
+          setPosts((prevPosts) =>
+            prevPosts.map((post) =>
+              post.id === postId
+                ? { ...post, like_count: post.like_count + 1 }
+                : post
+            )
+          );
+          await axios.post(
+            `http://localhost:8000/posts/like/${postId}/`,
+            {},
+            {
+              headers: { Authorization: `Token ${token}` },
+            }
+          );
+        }
       } catch (error) {
-        console.error("Error liking post:", error);
-        setError("Error liking post.");
+        console.error("Error handling like/unlike:", error);
+        setError("Error handling like/unlike.");
       }
     }
   };
@@ -172,7 +200,6 @@ const Posts = () => {
     <div className="container my-5">
       <h2 className="text-center mb-4">Posts</h2>
 
-      {/* Search Bar */}
       <div className="mb-4">
         <input
           type="text"
@@ -228,6 +255,18 @@ const Posts = () => {
                         </span>
                       )}
                     </p>
+                    <div className="mb-2">
+                      {post.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="badge bg-secondary me-2"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => setSearchQuery(tag)}
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
                     <div className="d-flex justify-content-between">
                       {user ? (
                         <div>
@@ -247,42 +286,37 @@ const Posts = () => {
                       </small>
                     </div>
 
-                    {user && user.username === loggedInUsername && (
-                      <div className="mt-auto">
+                    {user?.username === loggedInUsername && (
+                      <div className="d-flex justify-content-end">
                         <button
-                          onClick={() => {
-                            setEditingPostId(post.id);
-                          }}
-                          className="btn btn-primary btn-sm mt-2"
+                          className="btn btn-warning btn-sm me-2"
+                          onClick={() => setEditingPostId(post.id)}
                         >
                           Edit
                         </button>
                         <button
+                          className="btn btn-danger btn-sm"
                           onClick={() => handleDeletePost(post.id)}
-                          className="btn btn-danger btn-sm mt-2 ms-2"
                         >
                           Delete
                         </button>
                       </div>
                     )}
-                  </div>
 
-                  <div className="card-footer">
-                    <div className="tags">
-                      {post.tags.map((tag, index) => (
-                        <span key={index}>{tag}</span>
-                      ))}
-                    </div>
-
-                    {/* Like button and like count */}
                     <div className="mt-2">
                       <button
+                        className={`btn btn-sm ${
+                          likedPosts.has(post.id)
+                            ? "btn-danger"
+                            : "btn-outline-danger"
+                        }`}
                         onClick={() => handleLikePost(post.id)}
-                        className="btn btn-outline-primary btn-sm"
                       >
-                        Like
+                        {likedPosts.has(post.id) ? "Unlike" : "Like"}{" "}
+                        <span className="badge bg-light text-dark">
+                          {post.like_count}
+                        </span>
                       </button>
-                      <span className="ms-2">{post.like_count} Likes</span>
                     </div>
                   </div>
                 </div>
@@ -292,14 +326,10 @@ const Posts = () => {
         })}
       </div>
 
-      {/* Load more button */}
       {hasNextPage && !loading && (
-        <div className="text-center mt-4">
-          <button
-            onClick={() => setPage((prevPage) => prevPage + 1)}
-            className="btn btn-outline-secondary"
-          >
-            Load More
+        <div className="text-center my-4">
+          <button className="btn btn-primary" onClick={() => setPage(page + 1)}>
+            Load more
           </button>
         </div>
       )}
