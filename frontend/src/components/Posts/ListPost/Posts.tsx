@@ -10,6 +10,7 @@ interface Post {
   created_at: string;
   author: number;
   tags: string[];
+  like_count: number; // Add like_count to post data
 }
 
 interface User {
@@ -34,16 +35,16 @@ const Posts = () => {
   const [seenPostIds, setSeenPostIds] = useState<Set<number>>(new Set());
   const [expandedPosts, setExpandedPosts] = useState<Set<number>>(new Set());
   const [editingPostId, setEditingPostId] = useState<number | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>(""); // New state for search query
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const loggedInUsername = localStorage.getItem("username");
 
-  // Function to fetch posts based on search query and pagination
   const fetchPosts = () => {
     const token = localStorage.getItem("auth_token");
     if (token) {
       setLoading(true);
       let url = `http://localhost:8000/posts/?page=${page}`;
+
       if (searchQuery) {
         url += `&tag=${searchQuery}`;
       }
@@ -137,6 +138,32 @@ const Posts = () => {
       } catch (error) {
         console.error("Error deleting post:", error);
         setError("Failed to delete post.");
+      }
+    }
+  };
+
+  const handleLikePost = async (postId: number) => {
+    const token = localStorage.getItem("auth_token");
+    if (token) {
+      try {
+        await axios.post(
+          `http://localhost:8000/posts/like/${postId}/`, // Corrected URL structure
+          {},
+          {
+            headers: { Authorization: `Token ${token}` },
+          }
+        );
+        // Optionally, you can update the local state to reflect the like action
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId
+              ? { ...post, like_count: post.like_count + 1 }
+              : post
+          )
+        );
+      } catch (error) {
+        console.error("Error liking post:", error);
+        setError("Error liking post.");
       }
     }
   };
@@ -246,6 +273,17 @@ const Posts = () => {
                         <span key={index}>{tag}</span>
                       ))}
                     </div>
+
+                    {/* Like button and like count */}
+                    <div className="mt-2">
+                      <button
+                        onClick={() => handleLikePost(post.id)}
+                        className="btn btn-outline-primary btn-sm"
+                      >
+                        Like
+                      </button>
+                      <span className="ms-2">{post.like_count} Likes</span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -254,10 +292,14 @@ const Posts = () => {
         })}
       </div>
 
+      {/* Load more button */}
       {hasNextPage && !loading && (
-        <div className="text-center">
-          <button onClick={() => setPage(page + 1)} className="btn btn-primary">
-            Load more
+        <div className="text-center mt-4">
+          <button
+            onClick={() => setPage((prevPage) => prevPage + 1)}
+            className="btn btn-outline-secondary"
+          >
+            Load More
           </button>
         </div>
       )}
