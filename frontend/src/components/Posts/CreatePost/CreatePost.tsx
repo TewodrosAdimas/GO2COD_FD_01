@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios, { post } from "axios";
+
 
 const CreatePost = () => {
   const [title, setTitle] = useState("");
@@ -44,6 +45,7 @@ const CreatePost = () => {
           setTitle("");
           setContent("");
           setTags("");
+
         }
       } catch (error) {
         setMessage("Error creating post. Please try again.");

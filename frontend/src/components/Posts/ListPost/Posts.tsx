@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import UpdatePost from "../UpdatePost";
+
 interface Post {
   id: number;
   title: string;
@@ -33,20 +34,23 @@ const Posts = () => {
   const [seenPostIds, setSeenPostIds] = useState<Set<number>>(new Set());
   const [expandedPosts, setExpandedPosts] = useState<Set<number>>(new Set());
   const [editingPostId, setEditingPostId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>(""); // New state for search query
 
   const loggedInUsername = localStorage.getItem("username");
 
-  useEffect(() => {
+  // Function to fetch posts based on search query and pagination
+  const fetchPosts = () => {
     const token = localStorage.getItem("auth_token");
     if (token) {
       setLoading(true);
+      let url = `http://localhost:8000/posts/?page=${page}`;
+      if (searchQuery) {
+        url += `&tag=${searchQuery}`;
+      }
       axios
-        .get<PaginatedResponse<Post>>(
-          `http://localhost:8000/posts/?page=${page}`,
-          {
-            headers: { Authorization: `Token ${token}` },
-          }
-        )
+        .get<PaginatedResponse<Post>>(url, {
+          headers: { Authorization: `Token ${token}` },
+        })
         .then((response) => {
           const postData = response.data.results;
           const newPosts = postData.filter((post) => !seenPostIds.has(post.id));
@@ -91,7 +95,11 @@ const Posts = () => {
       setError("No token found. Please log in.");
       setLoading(false);
     }
-  }, [page, seenPostIds]);
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, [page, searchQuery, seenPostIds]);
 
   const profilePictureUrl = (profile_picture: string | null) => {
     return profile_picture
@@ -122,7 +130,7 @@ const Posts = () => {
     const token = localStorage.getItem("auth_token");
     if (token) {
       try {
-        await axios.delete(`http://localhost:8000/posts/${postId}/`, {
+        await axios.delete(`http://localhost:8000/posts/${postId}/delete`, {
           headers: { Authorization: `Token ${token}` },
         });
         setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
@@ -136,10 +144,23 @@ const Posts = () => {
   return (
     <div className="container my-5">
       <h2 className="text-center mb-4">Posts</h2>
+
+      {/* Search Bar */}
+      <div className="mb-4">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Search by tag (e.g., django, python)"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
       {loading && (
         <p className="text-center text-secondary">Loading posts...</p>
       )}
       {error && <p className="text-danger text-center">{error}</p>}
+
       <div className="row row-cols-1 row-cols-md-3 g-4">
         {posts.map((post) => {
           const user = users.get(post.author);
@@ -161,7 +182,6 @@ const Posts = () => {
                 <div className="card shadow-sm post-card">
                   <div className="card-body d-flex flex-column">
                     <h5 className="card-title">
-                      {/* Wrap the post title in a Link */}
                       <Link
                         to={`/posts/${post.id}`}
                         className="text-decoration-none"
@@ -200,7 +220,6 @@ const Posts = () => {
                       </small>
                     </div>
 
-                    {/* Move Edit and Delete buttons here */}
                     {user && user.username === loggedInUsername && (
                       <div className="mt-auto">
                         <button
@@ -234,6 +253,7 @@ const Posts = () => {
           );
         })}
       </div>
+
       {hasNextPage && !loading && (
         <div className="text-center">
           <button onClick={() => setPage(page + 1)} className="btn btn-primary">

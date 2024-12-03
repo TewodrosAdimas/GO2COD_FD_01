@@ -49,7 +49,6 @@ const UpdatePost: FC<UpdatePostProps> = ({ post }) => {
           body: JSON.stringify(updatedPost),
         }
       );
-
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
