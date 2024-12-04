@@ -25,3 +25,14 @@
   font-weight: bold;
   cursor: pointer;
 }
+
+
+.rounded-circle {
+  width: 80px !important;
+  height: 80px !important;
+  object-fit: cover; /* Ensures the image fits nicely within the circle */
+}
+
+.me-2 {
+  margin-right: 80px; /* This retains the spacing to the right of the image */
+}
