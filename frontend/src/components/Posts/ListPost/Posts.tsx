@@ -235,7 +235,6 @@ const Posts = () => {
               ) : (
                 <div className="card shadow-sm post-card">
                   <div className="card-body d-flex flex-column">
-                    {/* User Profile Section - Now above the post */}
                     {user && (
                       <div className="d-flex align-items-center mb-3">
                         <img
@@ -273,35 +272,48 @@ const Posts = () => {
                         </span>
                       )}
                     </p>
-                    <div className="d-flex justify-content-between">
+
+                    {/* Display tags */}
+                    {post.tags.length > 0 && (
+                      <div className="mt-2">
+                        {post.tags.map((tag, idx) => (
+                          <span
+                            key={idx}
+                            className="badge bg-secondary me-2"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="mt-auto">
                       <button
-                        className={`btn ${
-                          likedPosts.has(post.id)
-                            ? "btn-danger"
-                            : "btn-outline-primary"
-                        }`}
+                        className={`btn btn-${likedPosts.has(post.id) ? "success" : "outline-success"
+                          } me-2`}
                         onClick={() => handleLikePost(post.id)}
                       >
-                        {likedPosts.has(post.id) ? "Unlike" : "Like"} (
-                        {post.like_count})
+                        {likedPosts.has(post.id) ? "Liked" : "Like"}
                       </button>
-                      {loggedInUsername === user?.username && (
-                        <>
-                          <button
-                            className="btn btn-outline-warning"
-                            onClick={() => setEditingPostId(post.id)}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="btn btn-outline-danger"
-                            onClick={() => handleDeletePost(post.id)}
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
+                      <span>{post.like_count} likes</span>
                     </div>
+
+                    {user && user.username === loggedInUsername && (
+                      <div className="mt-3 d-flex justify-content-between">
+                        <button
+                          className="btn btn-sm btn-warning"
+                          onClick={() => setEditingPostId(post.id)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="btn btn-sm btn-danger"
+                          onClick={() => handleDeletePost(post.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -310,13 +322,16 @@ const Posts = () => {
         })}
       </div>
 
-      {hasNextPage && !loading && (
-        <button
-          className="btn btn-primary mt-3"
-          onClick={() => setPage((prevPage) => prevPage + 1)}
-        >
-          Load more posts
-        </button>
+      {hasNextPage && (
+        <div className="text-center mt-4">
+          <button
+            className="btn btn-primary"
+            onClick={() => setPage((prevPage) => prevPage + 1)}
+            disabled={loading}
+          >
+            Load more
+          </button>
+        </div>
       )}
     </div>
   );
