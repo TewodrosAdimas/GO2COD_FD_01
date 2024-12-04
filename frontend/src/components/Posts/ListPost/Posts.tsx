@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import UpdatePost from "../UpdatePost";
+import FollowButton from "../../Accounts/Follow_Unfollow/FollowButton";
 
 interface Post {
   id: number;
@@ -17,6 +18,7 @@ interface Post {
 interface User {
   username: string;
   profile_picture: string | null;
+  is_following: boolean;
 }
 
 interface PaginatedResponse<T> {
@@ -65,8 +67,7 @@ const Posts = () => {
             );
           }
 
-          // Update the likedPosts set based on the response data
-          newPosts.forEach((post: Post) => {
+          newPosts.forEach((post) => {
             if (post.is_liked) {
               setLikedPosts((prevLikedPosts) =>
                 new Set(prevLikedPosts).add(post.id)
@@ -76,7 +77,7 @@ const Posts = () => {
 
           setHasNextPage(response.data.next !== null);
 
-          newPosts.forEach((post: Post) => {
+          newPosts.forEach((post) => {
             if (!users.has(post.author)) {
               axios
                 .get<User>(`http://localhost:8000/accounts/${post.author}/`, {
@@ -87,9 +88,7 @@ const Posts = () => {
                     new Map(prevUsers).set(post.author, userResponse.data)
                   );
                 })
-                .catch((err) => {
-                  console.error("Error fetching user:", err);
-                });
+                .catch((err) => console.error("Error fetching user:", err));
             }
           });
 
@@ -267,27 +266,37 @@ const Posts = () => {
                         </span>
                       ))}
                     </div>
-                    <div className="d-flex justify-content-between">
-                      {user ? (
-                        <div>
-                          <img
-                            src={profilePictureUrl(user.profile_picture)}
-                            alt="Profile"
-                            className="img-fluid rounded-circle profile-picture"
-                            style={{ width: "120px", height: "120px" }}
-                          />
-                          <strong>{user.username}</strong>
-                        </div>
-                      ) : (
-                        <p>Loading author...</p>
-                      )}
-                      <small className="text-muted ml-2">
-                        {new Date(post.created_at).toLocaleString()}
-                      </small>
+                    <div className="mt-auto">
+                      <button
+                        className={`btn btn-sm me-2 ${
+                          likedPosts.has(post.id)
+                            ? "btn-outline-danger"
+                            : "btn-outline-primary"
+                        }`}
+                        onClick={() => handleLikePost(post.id)}
+                      >
+                        {likedPosts.has(post.id) ? "Unlike" : "Like"}
+                      </button>
+                      <span>{post.like_count} Likes</span>
                     </div>
-
+                    {user && (
+                      <div className="d-flex align-items-center mt-3">
+                        <img
+                          src={profilePictureUrl(user.profile_picture)}
+                          alt={user.username}
+                          className="rounded-circle me-2"
+                          style={{ width: "40px", height: "40px" }}
+                        />
+                        <div>
+                          <p className="mb-0">{user.username}</p>
+                          {user.username !== loggedInUsername && (
+                            <FollowButton targetUsername={user.username} />
+                          )}
+                        </div>
+                      </div>
+                    )}
                     {user?.username === loggedInUsername && (
-                      <div className="d-flex justify-content-end">
+                      <div className="d-flex justify-content-end mt-2">
                         <button
                           className="btn btn-warning btn-sm me-2"
                           onClick={() => setEditingPostId(post.id)}
@@ -302,22 +311,6 @@ const Posts = () => {
                         </button>
                       </div>
                     )}
-
-                    <div className="mt-2">
-                      <button
-                        className={`btn btn-sm ${
-                          likedPosts.has(post.id)
-                            ? "btn-danger"
-                            : "btn-outline-danger"
-                        }`}
-                        onClick={() => handleLikePost(post.id)}
-                      >
-                        {likedPosts.has(post.id) ? "Unlike" : "Like"}{" "}
-                        <span className="badge bg-light text-dark">
-                          {post.like_count}
-                        </span>
-                      </button>
-                    </div>
                   </div>
                 </div>
               )}
@@ -326,10 +319,13 @@ const Posts = () => {
         })}
       </div>
 
-      {hasNextPage && !loading && (
-        <div className="text-center my-4">
-          <button className="btn btn-primary" onClick={() => setPage(page + 1)}>
-            Load more
+      {hasNextPage && (
+        <div className="text-center mt-4">
+          <button
+            className="btn btn-primary"
+            onClick={() => setPage((prevPage) => prevPage + 1)}
+          >
+            Load More Posts
           </button>
         </div>
       )}

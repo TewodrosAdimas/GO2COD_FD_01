@@ -8,6 +8,7 @@ from .views import (
     AllUsersProfileView,
     UserDetailView,
 )
+from . import views
 
 urlpatterns = [
     path(
@@ -15,6 +16,7 @@ urlpatterns = [
         AllUsersProfileView.as_view(),
         name="all_user_profiles",
     ),
+    path("profile/<str:username>/", views.profile_view, name="profile"),
     path("register/", UserRegistrationView.as_view(), name="user-register"),
     path("login/", LoginView.as_view(), name="user-login"),
     path("profile/", UserProfileView.as_view(), name="user-profile"),

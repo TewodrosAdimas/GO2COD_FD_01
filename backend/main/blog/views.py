@@ -16,6 +16,15 @@ from django.shortcuts import get_object_or_404
 from .models import CustomUser
 from notifications.models import Notification
 from django.contrib.contenttypes.models import ContentType
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+from rest_framework.authentication import authenticate
+from rest_framework.authtoken.models import Token
+from .serializers import LoginSerializer
 
 
 class UserDetailView(APIView):
@@ -58,20 +67,14 @@ class UserRegistrationView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import AllowAny
-from rest_framework.authentication import authenticate
-from rest_framework.authtoken.models import Token
-from .serializers import LoginSerializer
-
 class LoginView(APIView):
     """
     View to handle user login and token retrieval.
     """
 
-    permission_classes = [AllowAny]  # Allow unauthenticated users to access the login view
+    permission_classes = [
+        AllowAny
+    ]  # Allow unauthenticated users to access the login view
     authentication_classes = []  # No authentication needed for login
 
     def post(self, request):
@@ -90,14 +93,14 @@ class LoginView(APIView):
                 return Response(
                     {
                         "token": token.key,
-                        "username": user.username  # Include username in the response
+                        "username": user.username,  # Include username in the response
                     },
-                    status=status.HTTP_200_OK
+                    status=status.HTTP_200_OK,
                 )
             else:
                 return Response(
                     {"error": "Invalid credentials"},
-                    status=status.HTTP_401_UNAUTHORIZED
+                    status=status.HTTP_401_UNAUTHORIZED,
                 )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -198,3 +201,19 @@ class UnfollowUserView(APIView):
             actor=user,
             verb="started unfollowing you",
         )
+
+from rest_framework.decorators import api_view
+
+@api_view(["GET"])
+def profile_view(request, username):
+    # Get the user by username
+    user = get_object_or_404(CustomUser, username=username)
+
+    # Get the authenticated user (assumes you are using Token-based authentication)
+    current_user = request.user
+
+    # Check if the current user is following the target user
+    is_following = current_user.following.filter(id=user.id).exists()
+
+    # Return the follow status
+    return JsonResponse({"is_following": is_following})
