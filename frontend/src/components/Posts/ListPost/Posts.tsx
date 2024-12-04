@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import UpdatePost from "../UpdatePost";
 import FollowButton from "../../Accounts/Follow_Unfollow/FollowButton";
+import './styles.css';
 
 interface Post {
   id: number;
@@ -234,6 +235,24 @@ const Posts = () => {
               ) : (
                 <div className="card shadow-sm post-card">
                   <div className="card-body d-flex flex-column">
+                    {/* User Profile Section - Now above the post */}
+                    {user && (
+                      <div className="d-flex align-items-center mb-3">
+                        <img
+                          src={profilePictureUrl(user.profile_picture)}
+                          alt={user.username}
+                          className="rounded-circle me-2"
+                          style={{ width: "40px", height: "40px" }}
+                        />
+                        <div>
+                          <p className="mb-0">{user.username}</p>
+                          {user.username !== loggedInUsername && (
+                            <FollowButton targetUsername={user.username} />
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     <h5 className="card-title">
                       <Link
                         to={`/posts/${post.id}`}
@@ -254,63 +273,31 @@ const Posts = () => {
                         </span>
                       )}
                     </p>
-                    <div className="mb-2">
-                      {post.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="badge bg-secondary me-2"
-                          style={{ cursor: "pointer" }}
-                          onClick={() => setSearchQuery(tag)}
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="mt-auto">
+                    <div className="d-flex justify-content-between">
                       <button
-                        className={`btn btn-sm me-2 ${
-                          likedPosts.has(post.id)
-                            ? "btn-outline-danger"
-                            : "btn-outline-primary"
-                        }`}
                         onClick={() => handleLikePost(post.id)}
+                        className="btn btn-outline-primary"
                       >
-                        {likedPosts.has(post.id) ? "Unlike" : "Like"}
+                        {likedPosts.has(post.id) ? "Unlike" : "Like"}{" "}
+                        ({post.like_count})
                       </button>
-                      <span>{post.like_count} Likes</span>
+                      {loggedInUsername === user?.username && (
+                        <>
+                          <button
+                            className="btn btn-outline-warning"
+                            onClick={() => setEditingPostId(post.id)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="btn btn-outline-danger"
+                            onClick={() => handleDeletePost(post.id)}
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
                     </div>
-                    {user && (
-                      <div className="d-flex align-items-center mt-3">
-                        <img
-                          src={profilePictureUrl(user.profile_picture)}
-                          alt={user.username}
-                          className="rounded-circle me-2"
-                          style={{ width: "40px", height: "40px" }}
-                        />
-                        <div>
-                          <p className="mb-0">{user.username}</p>
-                          {user.username !== loggedInUsername && (
-                            <FollowButton targetUsername={user.username} />
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    {user?.username === loggedInUsername && (
-                      <div className="d-flex justify-content-end mt-2">
-                        <button
-                          className="btn btn-warning btn-sm me-2"
-                          onClick={() => setEditingPostId(post.id)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() => handleDeletePost(post.id)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
@@ -319,15 +306,13 @@ const Posts = () => {
         })}
       </div>
 
-      {hasNextPage && (
-        <div className="text-center mt-4">
-          <button
-            className="btn btn-primary"
-            onClick={() => setPage((prevPage) => prevPage + 1)}
-          >
-            Load More Posts
-          </button>
-        </div>
+      {hasNextPage && !loading && (
+        <button
+          className="btn btn-primary mt-3"
+          onClick={() => setPage((prevPage) => prevPage + 1)}
+        >
+          Load more posts
+        </button>
       )}
     </div>
   );
