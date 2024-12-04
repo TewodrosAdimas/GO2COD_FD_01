@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import UpdatePost from "../UpdatePost";
 import FollowButton from "../../Accounts/Follow_Unfollow/FollowButton";
-import './styles.css';
+import "./styles.css";
 
 interface Post {
   id: number;
@@ -275,11 +275,15 @@ const Posts = () => {
                     </p>
                     <div className="d-flex justify-content-between">
                       <button
+                        className={`btn ${
+                          likedPosts.has(post.id)
+                            ? "btn-danger"
+                            : "btn-outline-primary"
+                        }`}
                         onClick={() => handleLikePost(post.id)}
-                        className="btn btn-outline-primary"
                       >
-                        {likedPosts.has(post.id) ? "Unlike" : "Like"}{" "}
-                        ({post.like_count})
+                        {likedPosts.has(post.id) ? "Unlike" : "Like"} (
+                        {post.like_count})
                       </button>
                       {loggedInUsername === user?.username && (
                         <>
