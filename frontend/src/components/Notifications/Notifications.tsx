@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import './styles.css';
 
 // Define types for notifications and response
 interface Notification {
