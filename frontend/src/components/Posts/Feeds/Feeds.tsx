@@ -4,9 +4,8 @@ import axios from "axios";
 import UpdatePost from "../UpdatePost";
 import FollowButton from "../../Accounts/Follow_Unfollow/FollowButton";
 import "./styles.css";
-import { useLocation } from "react-router-dom";
 
-interface Post {
+interface Feeds {
   id: number;
   title: string;
   content: string;
@@ -30,9 +29,8 @@ interface PaginatedResponse<T> {
   results: T[];
 }
 
-const Posts = () => {
-  const location = useLocation(); // Get the current route
-  const [posts, setPosts] = useState<Post[]>([]);
+const Feeds = () => {
+  const [posts, setPosts] = useState<Feeds[]>([]);
   const [users, setUsers] = useState<Map<number, User>>(new Map());
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,22 +47,11 @@ const Posts = () => {
     const token = localStorage.getItem("auth_token");
     if (token) {
       setLoading(true);
-      // let url = `http://localhost:8000/posts/?page=${page}`;
-
-      let url = "";
-      if (location.pathname === "/feeds/") {
-        url = `http://localhost:8000/posts/feed/?page=${page}`;
-      } else if (location.pathname === "/posts/") {
-        url = `http://localhost:8000/posts/?page=${page}`;
-      }
-
-      console.log(location.pathname);
-      console.log(url);
-
+      let url = `http://localhost:8000/posts/feed/?page=${page}`;
       if (searchQuery) url += `&tag=${searchQuery}`;
 
       axios
-        .get<PaginatedResponse<Post>>(url, {
+        .get<PaginatedResponse<Feeds>>(url, {
           headers: { Authorization: `Token ${token}` },
         })
         .then((response) => {
@@ -137,7 +124,7 @@ const Posts = () => {
     });
   };
 
-  const handleSavePost = (updatedPost: Post) => {
+  const handleSavePost = (updatedPost: Feeds) => {
     setPosts((prevPosts) =>
       prevPosts.map((post) => (post.id === updatedPost.id ? updatedPost : post))
     );
@@ -350,4 +337,4 @@ const Posts = () => {
   );
 };
 
-export default Posts;
+export default Feeds;

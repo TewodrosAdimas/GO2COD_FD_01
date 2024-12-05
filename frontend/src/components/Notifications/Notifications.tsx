@@ -117,7 +117,7 @@ const Notifications = () => {
 
   return (
     <div>
-      <h2>Notifications</h2>
+      <h2>{unreadCount} Notifications</h2>
       <div>
         <strong>{unreadCount} unread notifications</strong>
         <button onClick={markAllAsRead}>Mark All as Read</button>

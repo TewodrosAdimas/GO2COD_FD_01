@@ -9,6 +9,8 @@ import CreatePost from "./components/Posts/CreatePost/CreatePost";
 import UpdatePost from "./components/Posts/UpdatePost";
 import PostDetails from "./components/Posts/PostDetails";
 import Notifications from "./components/Notifications/Notifications";
+import Feeds from "./components/Posts/Feeds/Feeds";
+
 
 const App = () => {
   return (
@@ -22,9 +24,9 @@ const App = () => {
         <Route path="/all_profiles" element={<AllProfiles />} />
         <Route path="/posts" element={<Posts />} />
         <Route path="/posts/create" element={<CreatePost />} />
-        <Route path="/posts/:id/edit" element={<UpdatePost />} />{" "}
-        <Route path="/notifications" element={<Notifications />} />{" "}
-        {/* Add this route for Notifications */}
+        <Route path="/posts/:id/edit" element={<UpdatePost />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/feeds" element={<Posts />} /> {/* Add Feeds route */}
       </Routes>
     </Router>
   );

@@ -21,6 +21,23 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
+
+class PostListPagination(PageNumberPagination):
+    page_size = 5  # Default number of items per page
+    page_size_query_param = "page_size"  # Allow clients to set page size
+    max_page_size = 100  # Restrict the maximum page size
+
+    def get_paginated_response(self, data):
+        return Response(
+            {
+                "count": self.page.paginator.count,  # Total number of posts
+                "next": self.get_next_link(),  # URL for the next page
+                "previous": self.get_previous_link(),  # URL for the previous page
+                "results": data,  # Paginated results
+            }
+        )
+
+
 class UserFeedView(APIView):
     """
     View to return the feed of posts from users that the currently authenticated user follows.
@@ -28,9 +45,8 @@ class UserFeedView(APIView):
     Only authenticated users can access this view.
     """
 
-    permission_classes = [
-        IsAuthenticated
-    ]  # Only authenticated users can access this view
+    permission_classes = [IsAuthenticated]  # Only authenticated users can access this view
+    pagination_class = PostListPagination  # Use the custom pagination class
 
     def get(self, request):
         """
@@ -46,27 +62,15 @@ class UserFeedView(APIView):
             "-created_at"
         )  # Assuming 'created_at' is the field for post creation time
 
+        # Paginate the posts
+        paginator = self.pagination_class()
+        paginated_posts = paginator.paginate_queryset(posts, request)
+
         # Serialize the posts using the PostSerializer
-        serializer = PostSerializer(posts, many=True)
+        serializer = PostSerializer(paginated_posts, many=True)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-# Define a custom pagination class
-class PostListPagination(PageNumberPagination):
-    page_size = 5  # Default number of items per page
-    page_size_query_param = "page_size"  # Allow clients to set page size
-    max_page_size = 100  # Restrict the maximum page size
-
-    def get_paginated_response(self, data):
-        return Response(
-            {
-                "count": self.page.paginator.count,  # Total number of posts
-                "next": self.get_next_link(),  # URL for the next page
-                "previous": self.get_previous_link(),  # URL for the previous page
-                "results": data,  # Paginated results
-            }
-        )
+        # Return the paginated response
+        return paginator.get_paginated_response(serializer.data)
 
 
 class PostListView(generics.ListAPIView):
@@ -159,9 +163,8 @@ class CommentListView(generics.ListAPIView):
 
 
 class CommentDetailView(generics.RetrieveAPIView):
-    queryset = Comment.objects.all().order_by('created_at')
+    queryset = Comment.objects.all().order_by("created_at")
     serializer_class = CommentSerializer
-
 
 
 class CommentUpdateView(generics.UpdateAPIView):

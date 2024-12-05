@@ -41,7 +41,7 @@ const UpdatePost: FC<UpdatePostProps> = ({ post }) => {
       const response = await fetch(
         `http://localhost:8000/posts/${updatedPost.id}/update/`,
         {
-          method: "PUT",
+          method: "PATCH",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Token ${token}`, // Include the token in the request headers
