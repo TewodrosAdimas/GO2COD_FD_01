@@ -52,9 +52,9 @@ const Posts = () => {
       // let url = `http://localhost:8000/posts/?page=${page}`;
 
       let url = "";
-      if (location.pathname === "/feeds/") {
+      if (location.pathname === "/feeds") {
         url = `http://localhost:8000/posts/feed/?page=${page}`;
-      } else if (location.pathname === "/posts/") {
+      } else if (location.pathname === "/posts") {
         url = `http://localhost:8000/posts/?page=${page}`;
       }
 
