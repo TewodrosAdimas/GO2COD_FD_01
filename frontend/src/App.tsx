@@ -39,7 +39,7 @@ const Navbar = () => {
               <Link to="/profile">Profile</Link>
             </li>
             <li>
-              <Link to="/all_profiles">All Profiles</Link>
+              <Link to="/all_profiles">All Users</Link>
             </li>
             <li>
               <Link to="/posts/create">Create Post</Link>

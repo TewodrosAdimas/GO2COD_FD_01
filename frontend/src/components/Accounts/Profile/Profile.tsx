@@ -49,7 +49,6 @@ const Profile = () => {
 
   return (
     <div className="container profile-container">
-      <h2 className="text-center my-4">Your Profile</h2>
 
       {loading && (
         <p className="text-center text-secondary">Loading your profile...</p>
