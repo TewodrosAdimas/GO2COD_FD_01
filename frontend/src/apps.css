@@ -1,71 +1,44 @@
-/* Navbar Container */
+/* General Navbar Styling */
 .navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #2c3e50;
-    padding: 15px 30px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    background-color: #2c3e50; /* Dark background for the navbar */
+    padding: 10px 20px; /* Padding for spacing */
   }
   
-  /* Logo Styling */
-  .logo-link {
-    color: #ecf0f1;
-    font-size: 24px;
+  .navbar .logo-link {
+    color: #ecf0f1; /* Light text color for the logo */
+    text-decoration: none; /* Remove underline from logo link */
+    font-size: 24px; /* Logo font size */
     font-weight: bold;
-    text-decoration: none;
   }
   
-  .logo-link:hover {
-    color: #3498db;
-  }
-  
-  /* Navigation Links */
-  .nav-links {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  .navbar .nav-links {
+    list-style: none; /* Remove list bullets */
     display: flex;
+    gap: 15px; /* Space out navigation items */
   }
   
-  .nav-links li {
-    margin-right: 25px;
+  .navbar .nav-links li {
+    display: inline-block; /* Display list items inline */
   }
   
-  /* Link Styling */
-  .nav-links a {
-    color: #ecf0f1;
-    text-decoration: none;
-    font-size: 16px;
-    font-weight: 500;
-    transition: color 0.3s ease;
+  .navbar .nav-links a {
+    color: #0b835b; /* Default text color for links */
+    text-decoration: none; /* Remove underline from links */
+    font-size: 18px; /* Font size for links */
+    font-weight: 600; /* Make the text a little bolder */
+    transition: color 0.3s ease; /* Smooth color transition */
   }
   
-  .nav-links a:hover {
-    color: #3498db;
-    text-decoration: underline;
+  .navbar .nav-links a:hover {
+    color: #f39c12; /* Change text color to yellow on hover */
   }
   
-  /* Hover effects on individual nav items */
-  .nav-links a:hover {
-    transform: scale(1.1);
+  .navbar .nav-links a:active {
+    color: #e74c3c; /* Change text color to red on active state */
   }
   
-  /* Optional: Styling for active links */
-  .nav-links a.active {
-    color: #3498db;
-  }
-  
-  /* Make navbar responsive */
-  @media (max-width: 768px) {
-    .nav-links {
-      flex-direction: column;
-      text-align: center;
-    }
-    .nav-links li {
-      margin: 10px 0;
-    }
+  .navbar .nav-links a:focus {
+    outline: none; /* Remove default focus outline */
+    color: #7c0880; /* Change text color to greenish on focus */
   }
   

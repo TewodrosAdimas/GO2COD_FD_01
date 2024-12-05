@@ -23,7 +23,7 @@ from rest_framework.exceptions import NotFound
 
 
 class PostListPagination(PageNumberPagination):
-    page_size = 5  # Default number of items per page
+    page_size = 6  # Default number of items per page
     page_size_query_param = "page_size"  # Allow clients to set page size
     max_page_size = 100  # Restrict the maximum page size
 

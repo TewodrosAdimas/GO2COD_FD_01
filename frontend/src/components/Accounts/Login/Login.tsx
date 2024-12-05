@@ -1,8 +1,8 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import axios, { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
+import styles from "./Login.module.css"; // Import the CSS module
 
-// Define the expected structure of the error response
 interface ErrorResponse {
   error: string;
 }
@@ -37,17 +37,12 @@ const Login = () => {
         "http://localhost:8000/accounts/login/",
         formData
       );
-  
-      // Assuming the backend sends token and username in response
+
       const { token, username } = response.data;
-  
-  
+
       if (token && username) {
-        // Store both token and username in localStorage
         localStorage.setItem("auth_token", token);
         localStorage.setItem("username", username);
-  
-        // Redirect the user after successful login
         navigate("/profile");
       } else {
         setError("Invalid login response. Username or Token missing.");
@@ -66,11 +61,14 @@ const Login = () => {
       }
     }
   };
-  
+
   return (
-    <div>
+    <div className={styles.container}>
+      {" "}
+      {/* Apply styles from the module */}
       <h2>Login</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className={styles.error}>{error}</p>}{" "}
+      {/* Apply error styles */}
       <form onSubmit={handleSubmit}>
         <div>
           <input
