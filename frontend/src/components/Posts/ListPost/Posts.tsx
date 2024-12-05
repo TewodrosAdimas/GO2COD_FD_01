@@ -277,10 +277,7 @@ const Posts = () => {
                     {post.tags.length > 0 && (
                       <div className="mt-2">
                         {post.tags.map((tag, idx) => (
-                          <span
-                            key={idx}
-                            className="badge bg-secondary me-2"
-                          >
+                          <span key={idx} className="badge bg-secondary me-2">
                             #{tag}
                           </span>
                         ))}
@@ -289,8 +286,11 @@ const Posts = () => {
 
                     <div className="mt-auto">
                       <button
-                        className={`btn btn-${likedPosts.has(post.id) ? "success" : "outline-success"
-                          } me-2`}
+                        className={`btn btn-${
+                          likedPosts.has(post.id)
+                            ? "success"
+                            : "outline-success"
+                        } me-2`}
                         onClick={() => handleLikePost(post.id)}
                       >
                         {likedPosts.has(post.id) ? "Liked" : "Like"}

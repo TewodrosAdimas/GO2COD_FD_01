@@ -8,6 +8,7 @@ import Posts from "./components/Posts/ListPost/Posts";
 import CreatePost from "./components/Posts/CreatePost/CreatePost";
 import UpdatePost from "./components/Posts/UpdatePost";
 import PostDetails from "./components/Posts/PostDetails";
+import Notifications from "./components/Notifications/Notifications";
 
 const App = () => {
   return (
@@ -22,7 +23,8 @@ const App = () => {
         <Route path="/posts" element={<Posts />} />
         <Route path="/posts/create" element={<CreatePost />} />
         <Route path="/posts/:id/edit" element={<UpdatePost />} />{" "}
-        {/* Route for UpdatePost */}
+        <Route path="/notifications" element={<Notifications />} />{" "}
+        {/* Add this route for Notifications */}
       </Routes>
     </Router>
   );

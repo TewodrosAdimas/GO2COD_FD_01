@@ -1,0 +1,46 @@
+.notifications-container {
+    width: 80%;
+    margin: 0 auto;
+  }
+  
+  .unread-count {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  
+  .unread-count button {
+    background-color: #007bff;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .unread-count button:hover {
+    background-color: #0056b3;
+  }
+  
+  .notifications-list {
+    border-top: 1px solid #ddd;
+    margin-top: 10px;
+  }
+  
+  .notification {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .notification.unread {
+    background-color: #f9f9f9;
+  }
+  
+  .notification.read {
+    background-color: #e9e9e9;
+  }
+  
+  .timestamp {
+    font-size: 0.9rem;
+    color: #666;
+  }
+  

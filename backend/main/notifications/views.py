@@ -14,6 +14,9 @@ class NotificationListView(APIView):
             "-is_read", "-timestamp"
         )  # Prioritize unread notifications
 
+        # Get unread count
+        unread_count = notifications.filter(is_read=False).count()
+
         response_data = [
             {
                 "actor": n.actor.username,
@@ -25,7 +28,11 @@ class NotificationListView(APIView):
             for n in notifications
         ]
 
-        return Response(response_data, status=status.HTTP_200_OK)
+        # Return unread_count and notifications
+        return Response(
+            {"unread_count": unread_count, "notifications": response_data},
+            status=status.HTTP_200_OK,
+        )
 
 
 class MarkNotificationsReadView(APIView):

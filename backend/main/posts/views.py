@@ -17,9 +17,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import Post, Like
-from blog.models import CustomUser
 from rest_framework.pagination import PageNumberPagination
-
+from rest_framework import generics
+from rest_framework.exceptions import NotFound
 
 class UserFeedView(APIView):
     """
@@ -138,14 +138,8 @@ class CommentCreateView(generics.CreateAPIView):
         )
 
 
-from rest_framework import generics
-from .models import Comment
-from .serializers import CommentSerializer
-from rest_framework.exceptions import NotFound
-
-
 class CommentListView(generics.ListAPIView):
-    queryset = Comment.objects.all().order_by('-created_at')
+    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
     def get_queryset(self):
@@ -165,7 +159,7 @@ class CommentListView(generics.ListAPIView):
 
 
 class CommentDetailView(generics.RetrieveAPIView):
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.all().order_by('created_at')
     serializer_class = CommentSerializer
 
 
