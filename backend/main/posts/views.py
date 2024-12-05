@@ -143,11 +143,14 @@ from .models import Comment
 from .serializers import CommentSerializer
 from rest_framework.exceptions import NotFound
 
+
 class CommentListView(generics.ListAPIView):
     serializer_class = CommentSerializer
 
     def get_queryset(self):
-        post_id = self.request.query_params.get("post")  # Get the 'post' query parameter
+        post_id = self.request.query_params.get(
+            "post"
+        )  # Get the 'post' query parameter
 
         if post_id is not None:
             try:
@@ -155,7 +158,9 @@ class CommentListView(generics.ListAPIView):
                 return Comment.objects.filter(post_id=post_id)
             except Comment.DoesNotExist:
                 raise NotFound("No comments found for the given post")
-        return Comment.objects.all()  # Return all comments if no post query parameter is provided
+        return (
+            Comment.objects.all()
+        )  # Return all comments if no post query parameter is provided
 
 
 class CommentDetailView(generics.RetrieveAPIView):
@@ -169,7 +174,17 @@ class CommentUpdateView(generics.UpdateAPIView):
     permission_classes = [IsAuthor]  # Ensure only the author can update
 
     def perform_update(self, serializer):
+        # Only update the `updated_at` field
         serializer.save(updated_at=timezone.now())
+
+    def update(self, request, *args, **kwargs):
+        # Allow partial updates by setting `partial=True`
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
 
 class CommentDeleteView(generics.DestroyAPIView):

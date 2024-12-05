@@ -24,6 +24,10 @@ const PostDetails = () => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState<string>("");
 
+  // Get the token from localStorage
+  const token = localStorage.getItem("auth_token");
+  const currentUser = localStorage.getItem("username"); // assuming 'current_user' stores the username
+
   // Fetch the post data
   useEffect(() => {
     const fetchPost = async () => {
@@ -39,44 +43,42 @@ const PostDetails = () => {
       }
     };
 
-    // Ensure we only fetch when 'id' exists
     if (id) {
       fetchPost();
     }
-  }, [id]); // Dependency is 'id' - fetch only when 'id' changes
+  }, [id]);
 
   // Fetch comments for the post
-useEffect(() => {
-  const fetchComments = async () => {
-    const token = localStorage.getItem("auth_token");
-    if (!token) {
-      console.error("No authentication token found.");
-      return;
-    }
-    try {
-      const response = await fetch(`http://localhost:8000/posts/comments/?post=${id}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${token}`, // Include the token here
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+  useEffect(() => {
+    const fetchComments = async () => {
+      if (!token) {
+        console.error("No authentication token found.");
+        return;
       }
-      const data = await response.json();
-      setComments(data);
-    } catch (error) {
-      console.error("Failed to fetch comments:", error);
+      try {
+        const response = await fetch(
+          `http://localhost:8000/posts/comments/?post=${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Token ${token}`,
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+        const data = await response.json();
+        setComments(data);
+      } catch (error) {
+        console.error("Failed to fetch comments:", error);
+      }
+    };
+
+    if (id) {
+      fetchComments();
     }
-  };
-
-  if (id && post) {
-    fetchComments();
-  }
-}, [id, post]);
-
-  // Get the token from localStorage
-  const token = localStorage.getItem("auth_token");
+  }, [id, token]);
 
   // Handle comment submission with token authentication
   const handleCommentSubmit = async (e: React.FormEvent) => {
@@ -90,7 +92,7 @@ useEffect(() => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Token ${token}`, // Include the token here (Token authentication)
+            Authorization: `Token ${token}`,
           },
           body: JSON.stringify({
             post: id,
@@ -111,6 +113,72 @@ useEffect(() => {
     }
   };
 
+  // Handle comment edit
+  const handleEditComment = (commentId: number, updatedContent: string) => {
+    if (!updatedContent.trim()) {
+      console.error("Updated content cannot be empty.");
+      return;
+    }
+
+    fetch(`http://localhost:8000/posts/comments/${commentId}/update/`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+      body: JSON.stringify({
+        content: updatedContent, // Ensure this is a valid string and not undefined or null
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to edit comment. Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((updatedComment) => {
+        setComments((prevComments) =>
+          prevComments.map((comment) =>
+            comment.id === updatedComment.id ? updatedComment : comment
+          )
+        );
+      })
+      .catch((error) => {
+        console.error("Failed to edit comment:", error.message);
+      });
+  };
+
+  // Handle comment delete
+  const handleDeleteComment = (commentId: number) => {
+    if (!token || !currentUser) {
+      console.error("User is not authenticated.");
+      return;
+    }
+
+    fetch(`http://localhost:8000/posts/comments/${commentId}/delete/`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          setComments((prevComments) =>
+            prevComments.filter((comment) => comment.id !== commentId)
+          );
+        } else {
+          console.error("Failed to delete comment");
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to delete comment:", error);
+      });
+  };
+
+  // Debugging: Log currentUser and comment.author
+  console.log("Current user:", currentUser);
+
   if (!post) {
     return <div className="loading">Loading...</div>;
   }
@@ -124,13 +192,38 @@ useEffect(() => {
       <div className="comments-section">
         <h2>Comments</h2>
         <ul>
-          {comments.map((comment) => (
-            <li key={comment.id}>
-              <strong>{comment.author}</strong>
-              <p>{comment.content}</p>
-              <small>{new Date(comment.created_at).toLocaleString()}</small>
-            </li>
-          ))}
+          {comments.map((comment) => {
+            console.log(
+              `Checking comment author: ${comment.author} == ${currentUser}`
+            );
+            return (
+              <li key={comment.id}>
+                <strong>{comment.author}</strong>
+                <p>{comment.content}</p>
+                <small>{new Date(comment.created_at).toLocaleString()}</small>
+
+                {/* Edit and Delete buttons for comments by the logged-in user */}
+                {comment.author === currentUser && (
+                  <div className="comment-actions">
+                    <button
+                      onClick={() =>
+                        handleEditComment(
+                          comment.id,
+                          prompt("Edit comment", comment.content) ||
+                            comment.content
+                        )
+                      }
+                    >
+                      Edit
+                    </button>
+                    <button onClick={() => handleDeleteComment(comment.id)}>
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
 
         <form onSubmit={handleCommentSubmit}>
