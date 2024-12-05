@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import "./styles.css"; // Import the CSS file
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./styles.css";
 
 interface Post {
   id: number;
@@ -23,19 +24,17 @@ const PostDetails = () => {
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState<string>("");
+  const [editCommentId, setEditCommentId] = useState<number | null>(null);
+  const [editContent, setEditContent] = useState<string>("");
 
-  // Get the token from localStorage
   const token = localStorage.getItem("auth_token");
-  const currentUser = localStorage.getItem("username"); // assuming 'current_user' stores the username
+  const currentUser = localStorage.getItem("username");
 
-  // Fetch the post data
   useEffect(() => {
     const fetchPost = async () => {
       try {
         const response = await fetch(`http://localhost:8000/posts/${id}/`);
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
         const data = await response.json();
         setPost(data);
       } catch (error) {
@@ -43,12 +42,9 @@ const PostDetails = () => {
       }
     };
 
-    if (id) {
-      fetchPost();
-    }
+    if (id) fetchPost();
   }, [id]);
 
-  // Fetch comments for the post
   useEffect(() => {
     const fetchComments = async () => {
       if (!token) {
@@ -65,9 +61,7 @@ const PostDetails = () => {
             },
           }
         );
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
         const data = await response.json();
         setComments(data);
       } catch (error) {
@@ -75,12 +69,9 @@ const PostDetails = () => {
       }
     };
 
-    if (id) {
-      fetchComments();
-    }
+    if (id) fetchComments();
   }, [id, token]);
 
-  // Handle comment submission with token authentication
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
@@ -94,67 +85,59 @@ const PostDetails = () => {
             "Content-Type": "application/json",
             Authorization: `Token ${token}`,
           },
-          body: JSON.stringify({
-            post: id,
-            content: newComment,
-          }),
+          body: JSON.stringify({ post: id, content: newComment }),
         }
       );
 
-      if (response.ok) {
-        const newCommentData = await response.json();
-        setComments((prevComments) => [...prevComments, newCommentData]);
-        setNewComment(""); // Reset the form
-      } else {
-        throw new Error("Failed to post comment.");
-      }
+      if (!response.ok) throw new Error("Failed to post comment.");
+      const newCommentData = await response.json();
+      setComments((prevComments) => [...prevComments, newCommentData]);
+      setNewComment("");
     } catch (error) {
       console.error("Failed to submit comment:", error);
     }
   };
 
-  // Handle comment edit
-  const handleEditComment = (commentId: number, updatedContent: string) => {
-    if (!updatedContent.trim()) {
-      console.error("Updated content cannot be empty.");
-      return;
-    }
-
-    fetch(`http://localhost:8000/posts/comments/${commentId}/update/`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Token ${token}`,
-      },
-      body: JSON.stringify({
-        content: updatedContent, // Ensure this is a valid string and not undefined or null
-      }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Failed to edit comment. Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((updatedComment) => {
-        setComments((prevComments) =>
-          prevComments.map((comment) =>
-            comment.id === updatedComment.id ? updatedComment : comment
-          )
-        );
-      })
-      .catch((error) => {
-        console.error("Failed to edit comment:", error.message);
-      });
+  const openEditModal = (commentId: number, currentContent: string) => {
+    setEditCommentId(commentId);
+    setEditContent(currentContent);
   };
 
-  // Handle comment delete
-  const handleDeleteComment = (commentId: number) => {
-    if (!token || !currentUser) {
-      console.error("User is not authenticated.");
-      return;
-    }
+  const closeEditModal = () => {
+    setEditCommentId(null);
+    setEditContent("");
+  };
 
+  const handleEditComment = async () => {
+    if (!editContent.trim() || editCommentId === null) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/posts/comments/${editCommentId}/update/`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify({ content: editContent }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to edit comment.");
+      const updatedComment = await response.json();
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment.id === updatedComment.id ? updatedComment : comment
+        )
+      );
+      closeEditModal();
+    } catch (error) {
+      console.error("Failed to edit comment:", error);
+    }
+  };
+
+  const handleDeleteComment = (commentId: number) => {
     fetch(`http://localhost:8000/posts/comments/${commentId}/delete/`, {
       method: "DELETE",
       headers: {
@@ -171,70 +154,105 @@ const PostDetails = () => {
           console.error("Failed to delete comment");
         }
       })
-      .catch((error) => {
-        console.error("Failed to delete comment:", error);
-      });
+      .catch((error) => console.error("Failed to delete comment:", error));
   };
 
-  // Debugging: Log currentUser and comment.author
-  console.log("Current user:", currentUser);
-
   if (!post) {
-    return <div className="loading">Loading...</div>;
+    return <div className="loading text-center">Loading...</div>;
   }
 
   return (
-    <div className="post-details-container">
-      <h1>{post.title}</h1>
-      <p>{post.content}</p>
-      <p className="tags">Tags: {post.tags}</p>
+    <div className="container my-5">
+      <div className="post-details bg-light p-4 rounded">
+        <h1 className="mb-3">{post.title}</h1>
+        <p>{post.content}</p>
+        <p className="text-muted">Tags: {post.tags}</p>
+      </div>
 
-      <div className="comments-section">
-        <h2>Comments</h2>
-        <ul>
-          {comments.map((comment) => {
-            console.log(
-              `Checking comment author: ${comment.author} == ${currentUser}`
-            );
-            return (
-              <li key={comment.id}>
-                <strong>{comment.author}</strong>
-                <p>{comment.content}</p>
-                <small>{new Date(comment.created_at).toLocaleString()}</small>
-
-                {/* Edit and Delete buttons for comments by the logged-in user */}
-                {comment.author === currentUser && (
-                  <div className="comment-actions">
-                    <button
-                      onClick={() =>
-                        handleEditComment(
-                          comment.id,
-                          prompt("Edit comment", comment.content) ||
-                            comment.content
-                        )
-                      }
-                    >
-                      Edit
-                    </button>
-                    <button onClick={() => handleDeleteComment(comment.id)}>
-                      Delete
-                    </button>
-                  </div>
-                )}
-              </li>
-            );
-          })}
+      <div className="comments-section mt-5">
+        <h2 className="mb-4">Comments</h2>
+        <ul className="list-group mb-4">
+          {comments.map((comment) => (
+            <li key={comment.id} className="list-group-item">
+              <strong>{comment.author}</strong>
+              <p>{comment.content}</p>
+              <small className="text-muted">
+                {new Date(comment.created_at).toLocaleString()}
+              </small>
+              {comment.author === currentUser && (
+                <div className="mt-2">
+                  <button
+                    className="btn btn-sm btn-primary me-2"
+                    onClick={() => openEditModal(comment.id, comment.content)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="btn btn-sm btn-danger"
+                    onClick={() => handleDeleteComment(comment.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+            </li>
+          ))}
         </ul>
 
-        <form onSubmit={handleCommentSubmit}>
+        <form onSubmit={handleCommentSubmit} className="form-group">
           <textarea
+            className="form-control mb-3"
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Add a comment..."
           />
-          <button type="submit">Post Comment</button>
+          <button type="submit" className="btn btn-primary">
+            Post Comment
+          </button>
         </form>
       </div>
+
+      {/* Edit Modal */}
+      {editCommentId !== null && (
+        <div className="modal show d-block" tabIndex={-1}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Edit Comment</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={closeEditModal}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <textarea
+                  className="form-control"
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  placeholder="Update your comment here"
+                />
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={closeEditModal}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleEditComment}
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

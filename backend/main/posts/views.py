@@ -145,6 +145,7 @@ from rest_framework.exceptions import NotFound
 
 
 class CommentListView(generics.ListAPIView):
+    queryset = Comment.objects.all().order_by('-created_at')
     serializer_class = CommentSerializer
 
     def get_queryset(self):
@@ -166,6 +167,7 @@ class CommentListView(generics.ListAPIView):
 class CommentDetailView(generics.RetrieveAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
 
 
 class CommentUpdateView(generics.UpdateAPIView):

@@ -105,6 +105,14 @@ class LoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from .serializers import UserRegistrationSerializer
+from .models import CustomUser
+
+
 class UserProfileView(APIView):
     """
     View to handle fetching and updating the authenticated user's profile.
@@ -120,10 +128,22 @@ class UserProfileView(APIView):
         Return the profile of the authenticated user along with follower count.
         """
         serializer = UserRegistrationSerializer(request.user)
-        # Add follower_count to the response data
         user_data = serializer.data
         user_data["follower_count"] = request.user.follower_count
         return Response(user_data)
+
+    def put(self, request):
+        """
+        Update the profile of the authenticated user.
+        """
+        user = request.user
+        serializer = UserRegistrationSerializer(
+            user, data=request.data, partial=True
+        )  # Allow partial updates
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class FollowUserView(APIView):
@@ -202,7 +222,9 @@ class UnfollowUserView(APIView):
             verb="started unfollowing you",
         )
 
+
 from rest_framework.decorators import api_view
+
 
 @api_view(["GET"])
 def profile_view(request, username):
