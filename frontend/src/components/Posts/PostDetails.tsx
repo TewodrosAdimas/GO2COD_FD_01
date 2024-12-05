@@ -24,22 +24,11 @@ const PostDetails = () => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState<string>("");
 
-  // Get the token from localStorage (or sessionStorage, or context)
-  const token = localStorage.getItem("auth_token");
-
-  // Define the headers to include the Authorization token
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization: `Token ${token}`, // Include the token here (Token authentication)
-  };
-
   // Fetch the post data
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/posts/${id}/`, {
-          headers, // Add the headers to the request
-        });
+        const response = await fetch(`http://localhost:8000/posts/${id}/`);
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`);
         }
@@ -50,32 +39,44 @@ const PostDetails = () => {
       }
     };
 
+    // Ensure we only fetch when 'id' exists
     if (id) {
       fetchPost();
     }
-  }, [id, headers]);
+  }, [id]); // Dependency is 'id' - fetch only when 'id' changes
 
   // Fetch comments for the post
-  useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        const response = await fetch(`http://localhost:8000/posts/comments/?post=${id}`, {
-          headers, // Add the headers to the request
-        });
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-        const data = await response.json();
-        setComments(data);
-      } catch (error) {
-        console.error("Failed to fetch comments:", error);
-      }
-    };
-
-    if (id) {
-      fetchComments();
+useEffect(() => {
+  const fetchComments = async () => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      console.error("No authentication token found.");
+      return;
     }
-  }, [id, headers]);
+    try {
+      const response = await fetch(`http://localhost:8000/posts/comments/?post=${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`, // Include the token here
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      const data = await response.json();
+      setComments(data);
+    } catch (error) {
+      console.error("Failed to fetch comments:", error);
+    }
+  };
+
+  if (id && post) {
+    fetchComments();
+  }
+}, [id, post]);
+
+  // Get the token from localStorage
+  const token = localStorage.getItem("auth_token");
 
   // Handle comment submission with token authentication
   const handleCommentSubmit = async (e: React.FormEvent) => {
@@ -83,14 +84,20 @@ const PostDetails = () => {
     if (!newComment.trim()) return;
 
     try {
-      const response = await fetch("http://localhost:8000/posts/comments/create/", {
-        method: "POST",
-        headers, // Include the token in the headers
-        body: JSON.stringify({
-          post: id,
-          content: newComment,
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:8000/posts/comments/create/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`, // Include the token here (Token authentication)
+          },
+          body: JSON.stringify({
+            post: id,
+            content: newComment,
+          }),
+        }
+      );
 
       if (response.ok) {
         const newCommentData = await response.json();
