@@ -54,33 +54,33 @@ class UserFeedView(APIView):
 
 # Define a custom pagination class
 class PostListPagination(PageNumberPagination):
-    page_size = 5  # Set page size to 5
-    page_size_query_param = "page_size"
-    max_page_size = 100  # Limit maximum page size to 100
+    page_size = 5  # Default number of items per page
+    page_size_query_param = "page_size"  # Allow clients to set page size
+    max_page_size = 100  # Restrict the maximum page size
 
     def get_paginated_response(self, data):
-        return Response({
-            'count': self.page.paginator.count,
-            'next': self.get_next_link(),
-            'previous': self.get_previous_link(),
-            'results': data,
-        })
+        return Response(
+            {
+                "count": self.page.paginator.count,  # Total number of posts
+                "next": self.get_next_link(),  # URL for the next page
+                "previous": self.get_previous_link(),  # URL for the previous page
+                "results": data,  # Paginated results
+            }
+        )
 
 
 class PostListView(generics.ListAPIView):
     serializer_class = PostSerializer
-    permission_classes = [
-        IsAuthenticated
-    ]  # Ensure user is authenticated to access posts
-    pagination_class = PostListPagination  # Set the custom pagination class
+    permission_classes = [IsAuthenticated]  # Restrict access to authenticated users
+    pagination_class = PostListPagination  # Use the custom pagination class
 
     def get_queryset(self):
         queryset = Post.objects.all()
         tag = self.request.query_params.get(
             "tag", None
-        )  # Get the tag from query params
+        )  # Fetch the 'tag' query parameter
         if tag:
-            queryset = queryset.filter(tags__name__in=[tag])  # Filter posts by the tag
+            queryset = queryset.filter(tags__name__in=[tag])  # Filter by tag
         return queryset
 
 
@@ -138,9 +138,24 @@ class CommentCreateView(generics.CreateAPIView):
         )
 
 
+from rest_framework import generics
+from .models import Comment
+from .serializers import CommentSerializer
+from rest_framework.exceptions import NotFound
+
 class CommentListView(generics.ListAPIView):
-    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        post_id = self.request.query_params.get("post")  # Get the 'post' query parameter
+
+        if post_id is not None:
+            try:
+                # Filter comments based on the post id
+                return Comment.objects.filter(post_id=post_id)
+            except Comment.DoesNotExist:
+                raise NotFound("No comments found for the given post")
+        return Comment.objects.all()  # Return all comments if no post query parameter is provided
 
 
 class CommentDetailView(generics.RetrieveAPIView):
