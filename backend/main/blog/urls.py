@@ -9,6 +9,7 @@ from .views import (
     UserDetailView,
 )
 from . import views
+from django.contrib.auth.views import LogoutView  # Import the LogoutView
 
 urlpatterns = [
     path(
@@ -23,4 +24,6 @@ urlpatterns = [
     path("<int:pk>/", UserDetailView.as_view(), name="user-detail"),
     path("follow/<str:username>/", FollowUserView.as_view(), name="follow_user"),
     path("unfollow/<str:username>/", UnfollowUserView.as_view(), name="unfollow_user"),
+    path("logout/", LogoutView.as_view(), name="user-logout"),  # Add logout path
+
 ]
