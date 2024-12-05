@@ -71,7 +71,6 @@ const FollowButton: React.FC<FollowButtonProps> = ({ targetUsername }) => {
           },
         }
       );
-      console.log(response.data); // Log the response for debugging
       setIsFollowing((prev) => !prev); // Toggle the follow state
     } catch (err) {
       console.error("Error toggling follow status:", err);

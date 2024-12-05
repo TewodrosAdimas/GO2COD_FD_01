@@ -41,8 +41,6 @@ const Login = () => {
       // Assuming the backend sends token and username in response
       const { token, username } = response.data;
   
-      console.log("Token:", token);
-      console.log("Username:", username);  // Log the username to check if it's received correctly
   
       if (token && username) {
         // Store both token and username in localStorage

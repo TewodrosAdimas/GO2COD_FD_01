@@ -33,7 +33,6 @@ const EditProfile = () => {
           },
         })
         .then((response) => {
-          console.log("Profile data fetched:", response.data); // Debugging
           setProfileData(response.data);
           setFormData({
             username: response.data.username,

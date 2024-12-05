@@ -42,7 +42,6 @@ const Notifications = () => {
           return;
         }
 
-        console.log("Sending GET request to /notifications/");
 
         const response = await axios.get<NotificationsResponse>("/notifications/", {
           headers: {
@@ -51,7 +50,6 @@ const Notifications = () => {
         });
 
         // Debug: Check if the response contains the expected structure
-        console.log("Response data structure:", response.data);
 
         if (response.data && response.data.notifications) {
           setNotifications(response.data.notifications);
@@ -80,7 +78,6 @@ const Notifications = () => {
         return;
       }
 
-      console.log("Sending POST request to /notifications/mark-read/");
 
       const response = await axios.post<MarkReadResponse>(
         "/notifications/mark-read/",
@@ -92,7 +89,6 @@ const Notifications = () => {
         }
       );
 
-      console.log("Response from mark-read:", response.data);
 
       // Update UI to reflect the notifications have been read
       if (response.data.message === "All notifications marked as read.") {
@@ -110,9 +106,6 @@ const Notifications = () => {
     }
   };
 
-  // Debug: Log current state before rendering
-  console.log("Notifications State:", notifications);
-  console.log("Unread Count State:", unreadCount);
 
   if (loading) {
     return <div>Loading notifications...</div>;
